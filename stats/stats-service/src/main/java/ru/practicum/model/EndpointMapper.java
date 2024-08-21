@@ -1,23 +1,17 @@
 package ru.practicum.model;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 import ru.practicum.stat.EndpointHitDTO;
+import ru.practicum.stat.ViewStatsDTO;
 
-public class EndpointMapper {
+@Mapper
+public interface EndpointMapper {
+    EndpointMapper INSTANCE = Mappers.getMapper(EndpointMapper.class);
 
-    public EndpointHit mapToModel(EndpointHitDTO dto) {
-        return EndpointHit.builder()
-                .ip(dto.getIp())
-                .app(dto.getApp())
-                .uri(dto.getUri())
-                .build();
-    }
+    public EndpointHit toEndpointHit(EndpointHitDTO dto);
 
-    public EndpointHitDTO mapToDto(EndpointHit model) {
-        return EndpointHitDTO.builder()
-                //надо не надо id по идее нам не нужно dto на возврат
-                .ip(model.getIp())
-                .app(model.getApp())
-                .uri(model.getUri())
-                .build();
-    }
+    public EndpointHitDTO toEndpointHitDTO(EndpointHit endpointHit);
+
+    public ViewStatsDTO toViewStatsDTO(EndpointHit model);
 }
