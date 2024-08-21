@@ -20,7 +20,6 @@ public class StatsController {
 
     @PostMapping("/hit")
     public ResponseEntity<Object> saveStats(@Valid @RequestBody EndpointHitDTO hitDto) {
-
         return statClient.saveStats(hitDto);
     }
 
