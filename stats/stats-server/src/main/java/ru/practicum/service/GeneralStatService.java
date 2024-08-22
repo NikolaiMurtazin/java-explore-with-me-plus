@@ -46,5 +46,4 @@ public class GeneralStatService implements StatService {
 
         return statRepository.findAllByNotUniqueIp(params.getStart(), params.getEnd());
     }
-
 }

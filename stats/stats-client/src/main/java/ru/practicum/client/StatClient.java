@@ -23,7 +23,7 @@ public class StatClient {
     private final RestClient restClient;
 
     @Autowired
-    public StatClient(@Value("${client.url") String startUrl) {
+    public StatClient(@Value("${client.url}") String startUrl) {
         restClient = RestClient.builder()
                 .baseUrl(startUrl)
                 .build();
