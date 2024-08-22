@@ -7,10 +7,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import ru.practicum.stat.StatsParams;
 import ru.practicum.stat.EndpointHitDTO;
+import ru.practicum.stat.StatsParams;
 import ru.practicum.stat.ViewStatsDTO;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
@@ -38,8 +42,8 @@ public class StatClient {
 
     public List<ViewStatsDTO> getStats(StatsParams params) {
         Map<String, Object> pathParams = Map.of(
-                "start", params.getStart(),
-                "end", params.getEnd(),
+                "start", encodeDate(params.getStart()),
+                "end", encodeDate(params.getEnd()),
                 "uris", params.getUris(),
                 "unique", params.getUnique()
         );
@@ -48,5 +52,11 @@ public class StatClient {
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {
                 });
+    }
+
+    private String encodeDate(LocalDateTime date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String formatted = date.format(formatter);
+        return URLEncoder.encode(formatted, StandardCharsets.UTF_8);
     }
 }
