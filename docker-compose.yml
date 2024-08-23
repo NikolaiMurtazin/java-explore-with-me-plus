@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   stats-server:
     build: ./stats/stats-server
@@ -7,13 +5,12 @@ services:
     ports:
       - "9090:9090"
     depends_on:
+      - ewm-service
       - stats-db
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/stats
       - SPRING_DATASOURCE_USERNAME=stats
       - SPRING_DATASOURCE_PASSWORD=stats
-    networks:
-      - app-network
 
   stats-db:
     image: postgres:16.1
@@ -25,27 +22,24 @@ services:
       - POSTGRES_USER=stats
       - POSTGRES_PASSWORD=stats
     healthcheck:
-      test: pg_isready -q -d $POSTGRES_DB -U $POSTGRES_USER
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
       timeout: 5s
       interval: 5s
       retries: 10
-    networks:
-      - app-network
 
-  main-service:
+  ewm-service:
     build: ./main-service
+    image: main-service
     container_name: main-service
     ports:
       - "8080:8080"
     depends_on:
       - ewm-db
     environment:
-      - CLIENT_URL=http://stats-server:9090
+      - CLIENT_URL=http://localhost:9090
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5431/main
       - SPRING_DATASOURCE_USERNAME=main
       - SPRING_DATASOURCE_PASSWORD=main
-    networks:
-      - app-network
 
   ewm-db:
     image: postgres:16.1
@@ -57,13 +51,7 @@ services:
       - POSTGRES_USER=main
       - POSTGRES_PASSWORD=main
     healthcheck:
-      test: pg_isready -q -d $POSTGRES_DB -U $POSTGRES_USER
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
       timeout: 5s
       interval: 5s
       retries: 10
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
