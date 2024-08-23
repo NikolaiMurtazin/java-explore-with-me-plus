@@ -41,9 +41,9 @@ public class GeneralStatService implements StatService {
         }
 
         if (urisPresent) {
-            return statRepository.findByNotUniqueIp(params.getStart(), params.getEnd(), params.getUris());
+            return statRepository.findByNonUniqueIp(params.getStart(), params.getEnd(), params.getUris());
         }
 
-        return statRepository.findAllByNotUniqueIp(params.getStart(), params.getEnd());
+        return statRepository.findAllByNonUniqueIp(params.getStart(), params.getEnd());
     }
 }
