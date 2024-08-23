@@ -6,8 +6,8 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan(basePackages = {"ru.practicum", "ru.practicum.client"})
-public class MainServer {
+public class Main {
     public static void main(String[] args) {
-        SpringApplication.run(MainServer.class, args);
+        SpringApplication.run(Main.class, args);
     }
 }
