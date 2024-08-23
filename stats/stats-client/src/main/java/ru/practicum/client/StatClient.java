@@ -7,7 +7,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import ru.practicum.stat.StatsParams;
+import ru.practicum.StatsParams;
 import ru.practicum.stat.EndpointHitDTO;
 import ru.practicum.stat.ViewStatsDTO;
 

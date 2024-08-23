@@ -4,7 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.stat.StatsParams;
+import ru.practicum.StatsParams;
 import ru.practicum.client.StatClient;
 import ru.practicum.stat.EndpointHitDTO;
 import ru.practicum.stat.ViewStatsDTO;
