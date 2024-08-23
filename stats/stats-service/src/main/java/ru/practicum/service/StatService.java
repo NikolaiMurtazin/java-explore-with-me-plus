@@ -7,6 +7,7 @@ import ru.practicum.stat.ViewStatsDTO;
 import java.util.List;
 
 public interface StatService {
+
     EndpointHitDTO save(EndpointHitDTO dto);
 
     List<ViewStatsDTO> getStats(StatsParams params);
