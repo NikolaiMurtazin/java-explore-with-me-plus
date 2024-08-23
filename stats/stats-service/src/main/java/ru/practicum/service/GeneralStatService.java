@@ -17,34 +17,17 @@ import java.util.List;
 public class GeneralStatService implements StatService {
 
     private final StatRepository statRepository;
-    private final EndpointMapper endpointMapper;
 
     @Override
     @Transactional
     public EndpointHitDTO save(EndpointHitDTO dto) {
-        EndpointHit endpointHit = statRepository.save(endpointMapper.toEndpointHit(dto));
+        EndpointHit endpointHit = statRepository.save(EndpointMapper.INSTANCE.toEndpointHit(dto));
 
-        return endpointMapper.toEndpointHitDTO(endpointHit);
+        return EndpointMapper.INSTANCE.toEndpointHitDTO(endpointHit);
     }
 
     @Override
     public List<ViewStatsDTO> getStats(StatsParams params) {
-        boolean unique = params.getUnique();
-        boolean urisPresent = !params.getUris().isEmpty();
-
-        if (unique && urisPresent) {
-            return statRepository.findByUniqueIp(params.getStart(), params.getEnd(), params.getUris());
-        }
-
-        if (unique) {
-            return statRepository.findAllByUniqueIp(params.getStart(), params.getEnd());
-        }
-
-        if (urisPresent) {
-            return statRepository.findByNotUniqueIp(params.getStart(), params.getEnd(), params.getUris());
-        }
-
-        return statRepository.findAllByNotUniqueIp(params.getStart(), params.getEnd());
+        return List.of();
     }
-
 }

@@ -1,17 +1,17 @@
 package ru.practicum.model;
 
-import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
-import org.mapstruct.MappingConstants;
+import org.mapstruct.factory.Mappers;
 import ru.practicum.stat.EndpointHitDTO;
 import ru.practicum.stat.ViewStatsDTO;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
+@Mapper
 public interface EndpointMapper {
+    EndpointMapper INSTANCE = Mappers.getMapper(EndpointMapper.class);
 
-    EndpointHit toEndpointHit(EndpointHitDTO dto);
+    public EndpointHit toEndpointHit(EndpointHitDTO dto);
 
-    EndpointHitDTO toEndpointHitDTO(EndpointHit endpointHit);
+    public EndpointHitDTO toEndpointHitDTO(EndpointHit endpointHit);
 
-    ViewStatsDTO toViewStatsDTO(EndpointHit model);
+    public ViewStatsDTO toViewStatsDTO(EndpointHit model);
 }
