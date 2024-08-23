@@ -30,7 +30,7 @@ public class StatController {
     @GetMapping("/stats")
     public List<ViewStatsDTO> getStats(@RequestParam("start") String start,
                                        @RequestParam("end") String end,
-                                       @RequestParam(value = "uris",required = false, defaultValue = "") List<String> uris,
+                                       @RequestParam(value = "uris",required = false, defaultValue = "[]") List<String> uris,
                                        @RequestParam(value = "unique", defaultValue = "false") Boolean unique) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String decodedStartDate = URLDecoder.decode(start, StandardCharsets.UTF_8);
