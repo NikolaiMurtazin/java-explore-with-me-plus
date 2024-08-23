@@ -13,6 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class StatsParams {
+
     private LocalDateTime start;
     private LocalDateTime end;
     private List<String> uris;
