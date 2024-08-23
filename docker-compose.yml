@@ -15,7 +15,7 @@ services:
 
   stats-db:
     image: postgres:16.1
-    container_name: postgres-stats
+    container_name: postgres
     ports:
       - "6432:5432"
     environment:
@@ -23,7 +23,7 @@ services:
       - POSTGRES_USER=stats
       - POSTGRES_PASSWORD=stats
     healthcheck:
-      test: pg_isready -q -d $POSTGRES_DB -U $POSTGRES_USER
+      test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
       timeout: 5s
       interval: 5s
       retries: 10
@@ -52,9 +52,3 @@ services:
       - POSTGRES_DB=main
       - POSTGRES_USER=main
       - POSTGRES_PASSWORD=main
-    healthcheck:
-      test: pg_isready -q -d $POSTGRES_DB -U $POSTGRES_USER
-      timeout: 5s
-      interval: 5s
-      retries: 10
-
