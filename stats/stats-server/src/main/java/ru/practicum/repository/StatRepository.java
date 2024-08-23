@@ -35,4 +35,5 @@ public interface StatRepository extends JpaRepository<EndpointHit, Long> {
             "WHERE (e.timestamp between ?1 AND ?2) AND e.uri IN ?3 " +
             "GROUP BY e.app, e.uri")
     List<ViewStatsDTO> findByNotUniqueIp(LocalDateTime start, LocalDateTime end, List<String> uri);
+
 }

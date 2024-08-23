@@ -7,4 +7,4 @@ CREATE TABLE IF NOT EXISTS endpointhit
     uri            VARCHAR(30)                             NOT NULL,
     ip             VARCHAR(30)                             NOT NULL,
     timestamp      TIMESTAMP WITHOUT TIME ZONE             NOT NULL
-);
+)
