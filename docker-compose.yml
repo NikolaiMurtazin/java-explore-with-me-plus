@@ -28,9 +28,9 @@ services:
       retries: 10
 
   ewm-service:
-    build: main-service
+    build: main
     image: main-service
-    container_name: main-service
+    container_name: main
     ports:
       - "8080:8080"
     depends_on:
