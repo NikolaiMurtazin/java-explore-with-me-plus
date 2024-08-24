@@ -1,8 +1,10 @@
 package ru.practicum.controller;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.stat.StatsParams;
 import ru.practicum.client.StatClient;
@@ -13,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
+@Validated
 @RequiredArgsConstructor
 public class StatsController {
 
@@ -24,8 +27,8 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
-    public List<ViewStatsDTO> getStats(@RequestParam("start") LocalDateTime start,
-                                       @RequestParam("end") LocalDateTime end,
+    public List<ViewStatsDTO> getStats(@Valid @RequestParam("start") @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime start,
+                                       @Valid @RequestParam("end") @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime end,
                                        @RequestParam("uris") List<String> uris,
                                        @RequestParam(value = "unique", defaultValue = "false") Boolean unique) {
         StatsParams statsParams = StatsParams.builder()
