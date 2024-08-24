@@ -1,7 +1,7 @@
 package ru.practicum.stat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
@@ -16,13 +16,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EndpointHitDTO {
-    @NotEmpty(message = "App name can't be empty")
+    @NotBlank(message = "App name can't be empty")
     private String app;
 
-    @NotEmpty(message = "URI can't be empty")
+    @NotBlank(message = "URI can't be empty")
     private String uri;
 
-    @NotEmpty(message = "IP can't be empty")
+    @NotBlank(message = "IP can't be empty")
     @Pattern(regexp = "^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$", message = "Invalid IP address format")
     private String ip;
 
