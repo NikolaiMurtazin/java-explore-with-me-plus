@@ -15,7 +15,7 @@ services:
 
   stats-db:
     image: postgres:16.1
-    container_name: postgres
+    container_name: postgres-stats
     ports:
       - "6432:5432"
     environment:
@@ -28,10 +28,10 @@ services:
       interval: 5s
       retries: 10
 
-  main-service:
+  ewm-service:
     build: ./main-service
-    image: main-service
-    container_name: main-service
+    image: ewm-service
+    container_name: ewm-service
     ports:
       - "8080:8080"
     depends_on:
@@ -45,7 +45,7 @@ services:
 
   ewm-db:
     image: postgres:16.1
-    container_name: postgres-main
+    container_name: postgres-ewm
     ports:
       - "6431:5431"
     environment:
