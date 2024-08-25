@@ -13,7 +13,7 @@ import java.io.StringWriter;
 
 @Slf4j
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class ErrorHandler {
     @ExceptionHandler({MethodArgumentNotValidException.class, ValidationException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleMethodArgumentNotValidException(final Exception e, HttpStatus status) {

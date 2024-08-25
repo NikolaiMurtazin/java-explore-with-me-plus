@@ -1,0 +1,22 @@
+package ru.practicum.user.dto;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.Builder;
+import lombok.Data;
+
+@Data
+@Builder
+public class NewUserRequest {
+    @NotBlank(message = "User name can't be blank")
+    @Size(min = 2, max = 250, message = "The length of the user name must be at least 2 characters and no more than " +
+            "250 characters")
+    private String name;
+
+    @Email(message = "Email should be valid")
+    @NotBlank(message = "Email can't be blank")
+    @Size(min = 2, max = 250, message = "The length of the user's email must be at least 6 characters and no more " +
+            "than 254 characters")
+    private String email;
+}
