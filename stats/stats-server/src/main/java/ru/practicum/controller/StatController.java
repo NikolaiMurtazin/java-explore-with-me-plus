@@ -2,6 +2,7 @@ package ru.practicum.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.service.StatService;
 import ru.practicum.stat.EndpointHitDTO;
@@ -21,6 +22,7 @@ public class StatController {
     private final StatService statService;
 
     @PostMapping("/hit")
+    @ResponseStatus(HttpStatus.CREATED)
     public EndpointHitDTO saveStats(@Valid @RequestBody
                                     EndpointHitDTO hitDto) {
         return statService.save(hitDto);
@@ -28,6 +30,7 @@ public class StatController {
 
 
     @GetMapping("/stats")
+    @ResponseStatus(HttpStatus.OK)
     public List<ViewStatsDTO> getStats(@RequestParam("start") String start,
                                        @RequestParam("end") String end,
                                        @RequestParam(value = "uris",required = false, defaultValue = "") List<String> uris,
