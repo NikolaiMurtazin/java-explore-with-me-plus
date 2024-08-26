@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.exeption.NotFoundException;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
@@ -18,12 +19,12 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
-
     private final UserMapper userMapper;
 
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public UserDto create(NewUserRequest dto) {
         User user = userMapper.toUser(dto);
 
@@ -31,7 +32,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteById(long id) {
+    @Transactional
+    public void delete(long id) {
         userRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("User with id= " + id + " was not found"));
 

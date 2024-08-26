@@ -11,7 +11,6 @@ import ru.practicum.user.model.User;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface UserMapper {
-
     @Mapping(target = "id", ignore = true)
     User toUser(final NewUserRequest newUserRequest);
 

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ViewStatsDTO {
-    private String app;    // Название приложения
-    private String uri;    // URI, по которому запрашивается статистика
-    private long hits;     // Количество запросов на данный URI
+    private String app;
+    private String uri;
+    private long hits;
 }
