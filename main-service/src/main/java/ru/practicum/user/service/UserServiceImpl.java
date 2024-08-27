@@ -13,6 +13,7 @@ import ru.practicum.user.mapper.UserMapper;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,12 +51,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<UserDto> getAllUsers(int from, int size) {
+    public List<UserDto> getUsers(int from, int size) {
         Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size);
         Page<User> usersPage = userRepository.findAll(pageable);
-
-        return usersPage.getContent().stream()
-                .map(userMapper::toUserDto)
-                .collect(Collectors.toList());
+        if (usersPage.hasContent()) {
+            return usersPage.getContent().stream()
+                    .map(userMapper::toUserDto)
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 }

@@ -1,4 +1,4 @@
-package ru.practicum.events.model;
+package ru.practicum.event.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +9,7 @@ import ru.practicum.category.model.State;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "events", schema = "public")
+@Table(name = "event", schema = "public")
 @Getter
 @Setter
 @ToString
