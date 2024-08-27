@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.NewCategoryDto;
 import ru.practicum.category.sevice.CategoryService;
+import ru.practicum.event.dto.EventFullDto;
+import ru.practicum.event.dto.NewEventDto;
+import ru.practicum.event.service.EventService;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.service.UserService;
@@ -21,17 +24,18 @@ import java.util.List;
 public class AdminController {
     private final UserService userService;
     private final CategoryService categoryService;
+    private final EventService eventService;
 
     //    ---- USER
     @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> getAllUsers(@RequestParam(value = "ids", required = false) List<Long> ids,
-                                     @RequestParam(value = "from", defaultValue = "0") int from,
-                                     @RequestParam(value = "size", defaultValue = "10") int size) {
+    public List<UserDto> getUsers(@RequestParam(value = "ids", required = false) List<Long> ids,
+                                  @RequestParam(value = "from", defaultValue = "0") int from,
+                                  @RequestParam(value = "size", defaultValue = "10") int size) {
         if (ids != null && !ids.isEmpty()) {
             return userService.getUsersByIds(ids);
         } else {
-            return userService.getAllUsers(from, size);
+            return userService.getUsers(from, size);
         }
     }
 
@@ -66,4 +70,24 @@ public class AdminController {
         dto.setId(catId);
         return categoryService.updateCategory(dto);
     }
+
+//    ----EVENT
+    @GetMapping("/events")
+    @ResponseStatus(HttpStatus.OK)
+    public List<EventFullDto> getEvents(@RequestParam(value = "users", required = false) List<Long> users,
+                                        @RequestParam(value = "states", required = false) List<String> states,
+                                        @RequestParam(value = "categories", required = false) List<Long> categories,
+                                        @RequestParam(value = "rangeStart", required = false) String rangeStart,
+                                        @RequestParam(value = "rangeEnd", required = false) String rangeEnd,
+                                        @RequestParam(value = "from", defaultValue = "0") int from,
+                                        @RequestParam(value = "size", defaultValue = "10") int size) {
+        return List.of();
+    }
+
+    @PatchMapping("/events/{eventId}")
+    @ResponseStatus(HttpStatus.OK)
+    public EventFullDto updateEvent(@PathVariable long eventId, @RequestBody NewEventDto dto) {
+        return eventService.update(eventId, dto);
+    }
+
 }
