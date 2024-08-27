@@ -11,8 +11,10 @@ import ru.practicum.category.dto.NewCategoryDto;
 import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.category.model.Category;
 import ru.practicum.category.repository.CategoryRepository;
+import ru.practicum.event.service.EventService;
 import ru.practicum.exeption.NotFoundException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +39,7 @@ public class CategoryServiceImpl implements CategoryService {
     public void delete(long catId) {
         categoryRepository.findById(catId)
                 .orElseThrow(() -> new NotFoundException("Category with id= " + catId + " was not found"));
-//        409 Существуют события, связанные с категорией --- если категория имеет события, то ее нельзя удалить
+//        TODO 409 Существуют события, связанные с категорией --- если категория имеет события, то ее нельзя удалить
 
         categoryRepository.deleteById(catId);
     }
@@ -57,9 +59,12 @@ public class CategoryServiceImpl implements CategoryService {
         Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size);
         Page<Category> categoriesPage = categoryRepository.findAll(pageable);
 
-        return categoriesPage.getContent().stream()
-                .map(categoryMapper::toCategoryDto)
-                .collect(Collectors.toList());
+        if (categoriesPage.hasContent()) {
+            return categoriesPage.getContent().stream()
+                    .map(categoryMapper::toCategoryDto)
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 
     @Override

@@ -12,5 +12,5 @@ public interface UserService {
 
     List<UserDto> getUsersByIds(List<Long> ids);
 
-    List<UserDto> getAllUsers(int from, int size);
+    List<UserDto> getUsers(int from, int size);
 }
