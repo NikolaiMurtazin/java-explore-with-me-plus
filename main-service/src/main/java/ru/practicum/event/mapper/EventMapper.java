@@ -12,8 +12,8 @@ import ru.practicum.event.model.Event;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface EventMapper {
 
-    @Mapping(target = "id", ignore = true)
-    Event toEvent(final NewEventDto newEventDto);
+//    @Mapping(target = "id", ignore = true)
+//    Event toEvent(final NewEventDto newEventDto);
 
     EventFullDto toFullDto(final Event category);
 

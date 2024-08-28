@@ -9,7 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.category.model.Location;
+import ru.practicum.event.model.Location;
 
 import java.time.LocalDateTime;
 

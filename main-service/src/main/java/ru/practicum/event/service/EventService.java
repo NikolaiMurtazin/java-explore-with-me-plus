@@ -1,13 +1,17 @@
 package ru.practicum.event.service;
 
+import ru.practicum.event.dto.AdminEventRequestParams;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.NewEventDto;
+import ru.practicum.event.dto.PublicEventRequestParams;
 
 import java.util.List;
 
 public interface EventService {
 
-    EventFullDto find();
+    List<EventFullDto> find(PublicEventRequestParams params);
+
+    List<EventFullDto> find(AdminEventRequestParams params);
 
     EventFullDto findById(long id);
 
