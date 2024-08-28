@@ -24,7 +24,6 @@ import java.util.List;
 public class AdminController {
     private final UserService userService;
     private final CategoryService categoryService;
-    private final EventService eventService;
 
     //    ---- USER
     @GetMapping("/users")
@@ -72,22 +71,6 @@ public class AdminController {
     }
 
 //    ----EVENT
-    @GetMapping("/events")
-    @ResponseStatus(HttpStatus.OK)
-    public List<EventFullDto> getEvents(@RequestParam(value = "users", required = false) List<Long> users,
-                                        @RequestParam(value = "states", required = false) List<String> states,
-                                        @RequestParam(value = "categories", required = false) List<Long> categories,
-                                        @RequestParam(value = "rangeStart", required = false) String rangeStart,
-                                        @RequestParam(value = "rangeEnd", required = false) String rangeEnd,
-                                        @RequestParam(value = "from", defaultValue = "0") int from,
-                                        @RequestParam(value = "size", defaultValue = "10") int size) {
-        return List.of();
-    }
 
-    @PatchMapping("/events/{eventId}")
-    @ResponseStatus(HttpStatus.OK)
-    public EventFullDto updateEvent(@PathVariable long eventId, @RequestBody NewEventDto dto) {
-        return eventService.update(eventId, dto);
-    }
 
 }
