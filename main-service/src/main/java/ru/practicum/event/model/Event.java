@@ -3,11 +3,14 @@ package ru.practicum.event.model;
 import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.category.model.Category;
+import ru.practicum.compilation.model.Compilation;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.HashSet;
 
 @Entity
-@Table(name = "event", schema = "public")
+@Table(name = "events", schema = "public")
 @Getter
 @Setter
 @ToString
@@ -25,6 +28,7 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_name", nullable = false)
+    @ToString.Exclude
     private Category category;
 
     @Column(name = "description", nullable = false)
@@ -35,6 +39,7 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location", nullable = false)
+    @ToString.Exclude
     private Location location;
 
     @Column(name = "created", nullable = false)
@@ -54,4 +59,8 @@ public class Event {
 
     @Enumerated(EnumType.STRING)
     private State state;
+
+    @ManyToMany(mappedBy = "events")
+    @ToString.Exclude
+    private Collection<Compilation> compilations = new HashSet<>();
 }

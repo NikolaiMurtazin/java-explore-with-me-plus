@@ -8,9 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.category.dto.NewCategoryDto;
 import ru.practicum.category.sevice.CategoryService;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.service.EventService;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
 import ru.practicum.user.service.UserService;
@@ -69,8 +66,4 @@ public class AdminController {
         dto.setId(catId);
         return categoryService.updateCategory(dto);
     }
-
-//    ----EVENT
-
-
 }

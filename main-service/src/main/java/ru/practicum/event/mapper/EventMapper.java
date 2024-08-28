@@ -17,6 +17,9 @@ public interface EventMapper {
 
     EventFullDto toFullDto(final Event category);
 
+    @Mapping(target = "views", ignore = true)
+    @Mapping(target = "initiator", ignore = true)
+    @Mapping(target = "confirmedRequests", ignore = true)
     EventShortDto toShortDto(final Event category);
     //TODO нужны будут кастомные мапперы, т.к. поля отличаются
 }
