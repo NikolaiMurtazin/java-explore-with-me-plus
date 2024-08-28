@@ -14,7 +14,9 @@ import ru.practicum.event.model.QEvent;
 import ru.practicum.event.repository.EventsRepository;
 import ru.practicum.exeption.NotFoundException;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -77,6 +79,11 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFullDto update(long eventId, NewEventDto event) {
         return null;
+    }
+
+    @Override
+    public Collection<Event> getByIds(List<Long> events) {
+        return eventsRepository.findAllById(events);
     }
 
     private Event getEvent(long eventId) {

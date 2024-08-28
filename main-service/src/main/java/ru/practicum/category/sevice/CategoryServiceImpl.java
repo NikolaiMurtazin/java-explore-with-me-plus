@@ -22,9 +22,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
 
-    private final CategoryMapper categoryMapper;
-
     private final CategoryRepository categoryRepository;
+
+    private final CategoryMapper categoryMapper;
 
     @Override
     @Transactional
