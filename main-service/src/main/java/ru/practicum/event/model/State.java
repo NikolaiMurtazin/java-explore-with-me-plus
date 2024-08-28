@@ -1,4 +1,4 @@
-package ru.practicum.category.model;
+package ru.practicum.event.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

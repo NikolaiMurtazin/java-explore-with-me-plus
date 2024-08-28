@@ -29,7 +29,7 @@ public class StatClient {
                 .build();
     }
 
-    public ResponseEntity<Object> saveStats(EndpointHitDTO dto) {
+    public ResponseEntity<Object> saveStats(EndpointHitDTO dto) { //TODO void, обернуть в try catch
         return restClient.post()
                 .uri("/hit")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -40,7 +40,7 @@ public class StatClient {
 
     }
 
-    public List<ViewStatsDTO> getStats(StatsParams params) {
+    public List<ViewStatsDTO> getStats(StatsParams params) { //TODO обернуть в try catch
         Map<String, Object> pathParams = Map.of(
                 "start", encodeDate(params.getStart()),
                 "end", encodeDate(params.getEnd()),
@@ -49,6 +49,7 @@ public class StatClient {
         );
         return restClient.get()
                 .uri("/stats", pathParams)
+
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {
                 });
