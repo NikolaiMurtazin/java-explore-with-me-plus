@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.category.model.Category;
 import ru.practicum.compilation.model.Compilation;
+import ru.practicum.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -27,9 +28,13 @@ public class Event {
     private String annotation;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "category_name", nullable = false)
+    @JoinColumn(name = "category_id", nullable = false)
     @ToString.Exclude
     private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "initiator_id", nullable = false)
+    private User initiator;
 
     @Column(name = "description", nullable = false)
     private String description;
@@ -38,7 +43,7 @@ public class Event {
     private LocalDateTime eventDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "location", nullable = false)
+    @JoinColumn(name = "location_id", nullable = false)
     @ToString.Exclude
     private Location location;
 

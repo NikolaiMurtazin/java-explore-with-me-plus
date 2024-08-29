@@ -3,7 +3,6 @@ package ru.practicum.request.model;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
-import ru.practicum.request.model.RequestState;
 
 public enum RequestState {
     PENDING("PENDING"),
@@ -12,7 +11,7 @@ public enum RequestState {
 
     CONFIRMED("CONFIRMED");
 
-    private String value;
+    private final String value;
 
     RequestState(String value) {
         this.value = value;
