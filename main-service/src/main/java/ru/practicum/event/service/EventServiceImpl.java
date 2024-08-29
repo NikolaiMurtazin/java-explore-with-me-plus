@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.client.StatClient;
 import ru.practicum.event.dto.AdminEventRequestParams;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.NewEventDto;
@@ -16,6 +17,7 @@ import ru.practicum.event.model.QEvent;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exeption.NotFoundException;
 import ru.practicum.request.dto.ParticipationRequestDto;
+import ru.practicum.request.repository.RequestRepository;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -28,6 +30,8 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
+    private final RequestRepository requestRepository;
+    private final StatClient statClient;
 
     @Override
     public List<ParticipationRequestDto> findAllB(PublicEventRequestParams params) {
@@ -55,21 +59,21 @@ public class EventServiceImpl implements EventService {
             conditions.add(event.paid.eq(params.getPaid()));
         }
 
-        List<Event> events = eventRepository.findAll(finalConditional, pageRequest).getContent();
 
+        List<Event> events = eventRepository.findAll(finalConditional, pageRequest).getContent();
+        List<Long> listEventIds = events.stream().map(Event::getId).toList();
 
 // TODO add 2 request to database
 
-
-        if (params.getOnlyAvailible() == true) {
-            List<> requests = requestRepository.findRequestWhereEventIn(List < Event > event, )
-            @Query("SELECT request_id, COUNT(request_id) FROM requests r WHERE r.event IN ?1 AND r.status= 'CONFIRMED' GROUP BY request_id")
+        statClient.getStats()
+        if (params.getOnlyAvailable()) {
+            requestRepository.findConfirmedRequestWhereEventIn(listEventIds);
         } else {
             List<> requests = requestRepository.findRequestWhereEventIn(List < Event > event)
-            @Query("SELECT request_id, COUNT(request_id) FROM requests r WHERE r.event IN ?1 AND GROUP BY request_id")
         }
 
-        statClient.get()
+        statClient.saveStats()
+
     }
 
     @Override

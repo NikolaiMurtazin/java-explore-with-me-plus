@@ -57,6 +57,9 @@ public class RequestServiceImpl implements RequestService {
         if (!requestRepository.findByEventAndRequester(event, requester).isEmpty()) {
             throw new ConflictException("Repeatable request not allowed");
         }
+        if(requestRepository.isParticipantLimitReached(event.getId())){
+            throw new ConflictException("Request limit reached");
+        }
         if (!event.getRequestModeration()) {
             dto.setStatus(RequestState.CONFIRMED);
         } else {
