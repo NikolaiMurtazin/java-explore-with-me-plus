@@ -32,7 +32,7 @@ public class ErrorHandler {
                 "Conflict occurred.",
                 ex.getMessage(),
                 LocalDateTime.now()
-        )
+        );
     }
 
     @ExceptionHandler
