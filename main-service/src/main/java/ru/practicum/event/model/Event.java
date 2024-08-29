@@ -58,7 +58,7 @@ public class Event {
     private Boolean requestModeration;
 
     @Enumerated(EnumType.STRING)
-    private State state;
+    private EventState state;
 
     @ManyToMany(mappedBy = "events")
     @ToString.Exclude
