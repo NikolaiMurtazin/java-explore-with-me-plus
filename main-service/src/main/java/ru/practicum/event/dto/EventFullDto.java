@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.event.model.Location;
-import ru.practicum.event.model.State;
+import ru.practicum.event.model.EventState;
 import ru.practicum.user.dto.UserShortDto;
 
 import java.time.LocalDateTime;
@@ -38,7 +38,7 @@ public class EventFullDto {
 
     private boolean requestModeration;
 
-    private State state;
+    private EventState state;
 
     private String title;
 

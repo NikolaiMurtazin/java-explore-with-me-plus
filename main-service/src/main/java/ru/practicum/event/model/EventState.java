@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public enum State {
+public enum EventState {
     PENDING("PENDING"),
 
     PUBLISHED("PUBLISHED"),
@@ -13,7 +13,7 @@ public enum State {
 
     private String value;
 
-    State(String value) {
+    EventState(String value) {
         this.value = value;
     }
 
@@ -24,8 +24,8 @@ public enum State {
     }
 
     @JsonCreator
-    public static State fromValue(@JsonProperty("state") String text) {
-        for (State b : State.values()) {
+    public static EventState fromValue(@JsonProperty("state") String text) {
+        for (EventState b : EventState.values()) {
             if (String.valueOf(b.value).equals(text)) {
                 return b;
             }

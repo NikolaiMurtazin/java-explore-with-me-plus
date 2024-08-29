@@ -8,8 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.AdminEventRequestParams;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.PublicEventRequestParams;
-import ru.practicum.event.model.State;
+import ru.practicum.event.model.EventState;
 import ru.practicum.event.service.EventService;
 import ru.practicum.exeption.WrongDateException;
 
@@ -27,7 +26,7 @@ public class AdminEventsController {
     @GetMapping("/events")
     @ResponseStatus(HttpStatus.OK)
     public List<EventFullDto> getEvents(@RequestParam(value = "users", required = false) List<Long> users,
-                                        @RequestParam(value = "states", required = false) List<State> states,
+                                        @RequestParam(value = "states", required = false) List<EventState> states,
                                         @RequestParam(value = "categories", required = false) List<Long> categories,
                                         @RequestParam(value = "rangeStart", required = false)
                                         @DateTimeFormat(pattern = ("dd-MM-yyyy HH:mm:ss")) LocalDateTime rangeStart,
