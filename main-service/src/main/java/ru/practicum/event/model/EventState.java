@@ -11,7 +11,7 @@ public enum EventState {
 
     CANCELED("CANCELED");
 
-    private String value;
+    private final String value;
 
     EventState(String value) {
         this.value = value;
