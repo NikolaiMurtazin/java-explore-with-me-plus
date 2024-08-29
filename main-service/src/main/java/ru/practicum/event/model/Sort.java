@@ -9,7 +9,7 @@ public enum Sort {
 
     VIEWS("VIEWS");
 
-    private String value;
+    private final String value;
 
     Sort(String value) {
         this.value = value;

@@ -15,25 +15,25 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name="requests")
+@Table(name = "requests")
 public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;
 
-    @Column(name="description")
+    @Column(name = "description")
     String description;
 
-    @Column(name="created")
+    @Column(name = "created")
     LocalDateTime created;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="event_id")
+    @JoinColumn(name = "event_id")
     Event event;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="requester_id")
+    @JoinColumn(name = "requester_id")
     User requester;
 
     @Enumerated(EnumType.STRING)

@@ -25,6 +25,17 @@ public class ErrorHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleConflictException(final ConflictException ex) {
+        return new ApiError(
+                HttpStatus.NOT_FOUND.name(),
+                "Conflict occurred.",
+                ex.getMessage(),
+                LocalDateTime.now()
+        )
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ApiError handleNotFoundException(final NotFoundException ex) {
         return new ApiError(

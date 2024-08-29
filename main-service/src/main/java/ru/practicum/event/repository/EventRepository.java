@@ -15,5 +15,5 @@ public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPre
             "AND e.CATEGORY_ID IN ?2 " +
             "AND e.PAID = ?3 " +
             "AND e.", nativeQuery = true)
-    public List<Event> findByAnnotation(String annotation);
+    List<Event> findByAnnotation(String annotation);
 }
