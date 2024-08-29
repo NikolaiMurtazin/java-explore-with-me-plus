@@ -7,7 +7,7 @@ import ru.practicum.event.model.Event;
 
 import java.util.List;
 
-public interface EventsRepository extends JpaRepository<Event, Long>, QuerydslPredicateExecutor<Event> {
+public interface EventRepository extends JpaRepository<Event, Long>, QuerydslPredicateExecutor<Event> {
 
     @Query(value = "SELECT * FROM events e " +
             "WHERE e.annotation LIKE LOWER(CONCAT('%', :text, '%')) " +
