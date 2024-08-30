@@ -21,7 +21,7 @@ import java.util.HashSet;
 public class Event {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "category_id")
+    @Column(name = "event_id")
     private Long id;
 
     @Column(name = "annotation", nullable = false)

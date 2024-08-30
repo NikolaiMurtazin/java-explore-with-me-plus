@@ -20,19 +20,19 @@ import java.util.Map;
 public class PublicEventsController {
     private final EventService eventService;
 
-    @GetMapping
+    @GetMapping()
     @ResponseStatus(HttpStatus.OK)
-    public List<EventFullDto> getEvents(@RequestParam(value = "text", required = false) String text,
-                                        @RequestParam(value = "categories", required = false) List<Long> categories,
-                                        @RequestParam(value = "paid", required = false) Boolean paid,
-                                        @RequestParam(value = "rangeStart", required = false)
-                                        @DateTimeFormat(pattern = ("dd-MM-yyyy HH:mm:ss")) LocalDateTime rangeStart,
-                                        @RequestParam(value = "rangeEnd", required = false)
-                                        @DateTimeFormat(pattern = ("dd-MM-yyyy HH:mm:ss")) LocalDateTime rangeEnd,
-                                        @RequestParam(value = "onlyAvailable", defaultValue = "false") Boolean onlyAvailable,
-                                        @RequestParam(value = "sort", required = false) Sort sort,
-                                        @RequestParam(value = "from", defaultValue = "0") int from,
-                                        @RequestParam(value = "size", defaultValue = "10") int size) {
+    public List<EventFullDto> getEventsPublic(@RequestParam(value = "text", required = false) String text,
+                                              @RequestParam(value = "categories", required = false) List<Long> categories,
+                                              @RequestParam(value = "paid", required = false) Boolean paid,
+                                              @RequestParam(value = "rangeStart", required = false)
+                                              @DateTimeFormat(pattern = ("dd-MM-yyyy HH:mm:ss")) LocalDateTime rangeStart,
+                                              @RequestParam(value = "rangeEnd", required = false)
+                                              @DateTimeFormat(pattern = ("dd-MM-yyyy HH:mm:ss")) LocalDateTime rangeEnd,
+                                              @RequestParam(value = "onlyAvailable", defaultValue = "false") Boolean onlyAvailable,
+                                              @RequestParam(value = "sort", required = false) Sort sort,
+                                              @RequestParam(value = "from", defaultValue = "0") int from,
+                                              @RequestParam(value = "size", defaultValue = "10") int size) {
 
         Map<String, LocalDateTime> ranges = validDate(rangeStart, rangeEnd);
         PublicEventRequestParams params = PublicEventRequestParams.builder()
@@ -46,7 +46,7 @@ public class PublicEventsController {
                 .from(from)
                 .size(size)
                 .build();
-//        eventService.findAll(params);
+        eventService.getEvents(params);
         return List.of();
     }
 

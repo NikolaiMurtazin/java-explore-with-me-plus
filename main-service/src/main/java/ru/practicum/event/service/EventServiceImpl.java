@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.category.model.Category;
+import ru.practicum.category.repository.CategoryRepository;
 import ru.practicum.client.StatClient;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.mapper.EventMapper;
@@ -18,14 +20,12 @@ import ru.practicum.request.dto.EventCountByRequest;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.stat.StatsParams;
 import ru.practicum.stat.ViewStatsDTO;
-import ru.practicum.user.dto.UserShortDto;
 import ru.practicum.user.mapper.UserMapper;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +40,7 @@ public class EventServiceImpl implements EventService {
     private final StatClient statClient;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public List<EventShortDto> getEvents(PublicEventRequestParams params) {
@@ -93,8 +94,7 @@ public class EventServiceImpl implements EventService {
             Optional<ViewStatsDTO> first = viewStatsDTOS.stream().filter(stat -> stat.getUri().equals("/event/" + ev.getEventId())).findFirst();
             long views = first.map(ViewStatsDTO::getHits).orElse(0L);
             long countConfirmedRequest = ev.getCount();
-            UserShortDto userShortDto = userMapper.toUserShortDto(finalEvent.getInitiator());
-            return eventMapper.toShortDto(finalEvent, views, userShortDto, countConfirmedRequest);
+            return eventMapper.toShortDto(finalEvent, views, countConfirmedRequest);
         }).toList();
 
 //        EndpointHitDTO hitDTO = new EndpointHitDTO()
@@ -143,8 +143,8 @@ public class EventServiceImpl implements EventService {
         if (event.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
             throw new ConflictException("Different with now less than 2 hours");
         }
-
-        Event entity = eventMapper.toEntity(event, LocalDateTime.now(), user, EventState.PUBLISHED);
+        Category category = categoryRepository.getById(Long.valueOf(event.getCategory()));
+        Event entity = eventMapper.toEntity(event, LocalDateTime.now(), user, EventState.PUBLISHED, category);
         Event saved = eventRepository.save(entity);
 
         return eventMapper.toFullDto(saved, 0, 0);
@@ -167,7 +167,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Collection<Event> getByIds(List<Long> events) {
+    public List<Event> getByIds(List<Long> events) {
         return eventRepository.findAllById(events);
     }
 

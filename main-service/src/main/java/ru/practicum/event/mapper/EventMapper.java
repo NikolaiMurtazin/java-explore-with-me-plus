@@ -4,12 +4,12 @@ import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
+import ru.practicum.category.model.Category;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
-import ru.practicum.user.dto.UserShortDto;
 import ru.practicum.user.model.User;
 
 import java.time.LocalDateTime;
@@ -20,17 +20,18 @@ public interface EventMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "compilations", ignore = true)
     @Mapping(target = "createdOn", source = "now")
-    @Mapping(target = "initiator", source = "user.id")
+    @Mapping(target = "initiator", source = "user")
     @Mapping(target = "state", source = "state")
-    Event toEntity(final NewEventDto newEventDto, LocalDateTime now, User user, EventState state);
+    @Mapping(target = "category", source = "category")
+    Event toEntity(final NewEventDto newEventDto, LocalDateTime now, User user, EventState state, Category category);
 
     @Mapping(target = "views", source = "views")
     @Mapping(target = "confirmedRequests", source = "confirmedRequests")
     EventFullDto toFullDto(final Event event, long views, long confirmedRequests);
 
     @Mapping(target = "views", source = "views")
-    @Mapping(target = "initiator", source = "userShortDto")
     @Mapping(target = "confirmedRequests", source = "confirmedRequests")
-    EventShortDto toShortDto(final Event category, long views, UserShortDto userShortDto, long confirmedRequests);
+    @Mapping(target = "id", source = "event.id")
+    EventShortDto toShortDto(final Event event, long views, long confirmedRequests);
     //TODO нужны будут кастомные мапперы, т.к. поля отличаются
 }
