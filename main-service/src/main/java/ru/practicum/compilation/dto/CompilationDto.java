@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.event.dto.EventShortDto;
 
-import java.util.List;
+import java.util.Collection;
 
 @Data
 @AllArgsConstructor
@@ -17,7 +17,7 @@ public class CompilationDto {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
-    private List<EventShortDto> events;
+    private Collection<EventShortDto> events;
 
     private boolean pinned;
 

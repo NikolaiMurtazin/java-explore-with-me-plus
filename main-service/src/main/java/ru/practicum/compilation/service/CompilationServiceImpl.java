@@ -56,7 +56,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (newCompilationDto.getEvents() != null) {
             events = eventService.getByIds(newCompilationDto.getEvents());
         }
-        Compilation compilation = compilationMapper.toEntity(newCompilationDto, events);
+        Compilation compilation = compilationMapper.toCompilation(newCompilationDto, events);
         //TODO достать views User requests и положить в маппер
         Compilation saved = compilationRepository.save(compilation);
         List<EventShortDto> list = getEventShortDtos(saved);

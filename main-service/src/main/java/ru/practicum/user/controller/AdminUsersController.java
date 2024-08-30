@@ -1,6 +1,5 @@
 package ru.practicum.user.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -29,9 +28,9 @@ public class AdminUsersController {
 
     @GetMapping("/users")
     @ResponseStatus(HttpStatus.OK)
-    public List<UserDto> getUsers(@RequestParam(value = "ids", required = false) List<Long> ids,
-                                  @RequestParam(value = "from", defaultValue = "0") int from,
-                                  @RequestParam(value = "size", defaultValue = "10") int size) {
+    public List<UserDto> getAll(@RequestParam(value = "ids", required = false) List<Long> ids,
+                                @RequestParam(value = "from", defaultValue = "0") int from,
+                                @RequestParam(value = "size", defaultValue = "10") int size) {
         AdminUserParams params = AdminUserParams.builder()
                 .ids(ids)
                 .from(from)
@@ -42,13 +41,13 @@ public class AdminUsersController {
 
     @PostMapping("/users")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDto createUser(@Valid @RequestBody NewUserRequest dto) {
+    public UserDto create(@Validated @RequestBody NewUserRequest dto) {
         return userService.create(dto);
     }
 
     @DeleteMapping("/users/{userId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteUser(@PathVariable long userId) {
+    public void delete(@PathVariable long userId) {
         userService.delete(userId);
     }
 }

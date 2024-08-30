@@ -44,13 +44,13 @@ public class AdminEventsController {
                 .from(from)
                 .size(size)
                 .build();
-        return eventService.getEvents(params);
+        return eventService.getAll(params);
     }
 
     @PatchMapping("/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto updateEvent(@PathVariable long eventId, @RequestBody UpdateEventAdminRequest dto) {
-        return eventService.updateEvent(eventId, dto);
+        return eventService.update(eventId, dto);
     }
 
     private Map<String, LocalDateTime> validDate(LocalDateTime rangeStart, LocalDateTime rangeEnd) {

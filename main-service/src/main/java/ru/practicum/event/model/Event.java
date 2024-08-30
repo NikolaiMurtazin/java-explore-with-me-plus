@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.category.model.Category;
 import ru.practicum.compilation.model.Compilation;
-import ru.practicum.location.Location;
+import ru.practicum.location.model.Location;
 import ru.practicum.user.model.User;
 
 import java.time.LocalDateTime;
@@ -33,9 +33,11 @@ public class Event {
     @ToString.Exclude
     private Category category;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "initiator_id", nullable = false)
-    private User initiator;
+    @Column(name = "confirmed_requests", nullable = false)
+    private Integer confirmedRequests = 0;
+
+    @Column(name = "created_on", nullable = false)
+    private LocalDateTime createdOn;
 
     @Column(name = "description", nullable = false)
     private String description;
@@ -44,27 +46,35 @@ public class Event {
     private LocalDateTime eventDate;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "initiator_id", nullable = false)
+    @ToString.Exclude
+    private User initiator;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "location_id", nullable = false)
     @ToString.Exclude
     private Location location;
-
-    @Column(name = "created", nullable = false)
-    private LocalDateTime createdOn;
-
-    @Column(name = "title", nullable = false)
-    private String title;
 
     @Column(name = "paid", nullable = false)
     private Boolean paid;
 
     @Column(name = "participant_limit", nullable = false)
-    private Integer participantLimit;
+    private Integer participantLimit = 0;
+
+    @Column(name = "published_on")
+    private LocalDateTime publishedOn;
 
     @Column(name = "request_moderation", nullable = false)
     private Boolean requestModeration;
 
     @Enumerated(EnumType.STRING)
     private EventState state;
+
+    @Column(name = "title", nullable = false)
+    private String title;
+
+    @Column(name = "views", nullable = false)
+    private Long views = 0L;
 
     @ManyToMany(mappedBy = "events")
     @ToString.Exclude
