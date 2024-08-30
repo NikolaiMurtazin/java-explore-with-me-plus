@@ -7,7 +7,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.AdminEventRequestParams;
 import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.NewEventDto;
+import ru.practicum.event.dto.UpdateEventAdminRequest;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.service.EventService;
 import ru.practicum.exeption.WrongDateException;
@@ -49,8 +49,8 @@ public class AdminEventsController {
 
     @PatchMapping("/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto updateEvent(@PathVariable long eventId, @RequestBody NewEventDto dto) {
-        return eventService.update(eventId, dto);
+    public EventFullDto updateEvent(@PathVariable long eventId, @RequestBody UpdateEventAdminRequest dto) {
+        return eventService.updateEvent(eventId, dto);
     }
 
     private Map<String, LocalDateTime> validDate(LocalDateTime rangeStart, LocalDateTime rangeEnd) {

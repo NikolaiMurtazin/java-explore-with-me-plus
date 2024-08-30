@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.event.model.Event;
-import ru.practicum.request.model.RequestState;
+import ru.practicum.request.model.RequestStatus;
 import ru.practicum.user.model.User;
 
 import java.time.LocalDateTime;
@@ -24,6 +24,6 @@ public class ParticipationRequestDto {
 
     User requester;
 
-    RequestState status;
+    RequestStatus status;
 
 }
