@@ -6,19 +6,21 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.client.StatClient;
-import ru.practicum.event.dto.AdminEventRequestParams;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.PublicEventRequestParams;
+import ru.practicum.event.dto.*;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
 import ru.practicum.event.model.QEvent;
 import ru.practicum.event.repository.EventRepository;
+import ru.practicum.exeption.ConflictException;
 import ru.practicum.exeption.NotFoundException;
-import ru.practicum.request.dto.ParticipationRequestDto;
+import ru.practicum.request.dto.EventCountByRequest;
 import ru.practicum.request.repository.RequestRepository;
+import ru.practicum.stat.StatsParams;
+import ru.practicum.user.model.User;
+import ru.practicum.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -32,9 +34,10 @@ public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final RequestRepository requestRepository;
     private final StatClient statClient;
+    private final UserRepository userRepository;
 
     @Override
-    public List<ParticipationRequestDto> findAllB(PublicEventRequestParams params) {
+    public List<EventShortDto> getEvents(PublicEventRequestParams params) {
         QEvent event = QEvent.event;
         List<BooleanExpression> conditions = new ArrayList<>();
 
@@ -62,40 +65,48 @@ public class EventServiceImpl implements EventService {
 
         List<Event> events = eventRepository.findAll(finalConditional, pageRequest).getContent();
         List<Long> listEventIds = events.stream().map(Event::getId).toList();
-
+        List<String> listEndpoint = new ArrayList<>();
 // TODO add 2 request to database
-
-        statClient.getStats()
+        List<EventCountByRequest> listEvents;
         if (params.getOnlyAvailable()) {
-            requestRepository.findConfirmedRequestWhereEventIn(listEventIds);
+            listEvents = requestRepository.findConfirmedRequestWithoutLimitCheck(listEventIds);
         } else {
-            List<> requests = requestRepository.findRequestWhereEventIn(List < Event > event)
+            listEvents = requestRepository.findConfirmedRequestWithLimitCheck(listEventIds);
         }
+        List<Event> finalList = events.stream()
+                .filter(listEvents::contains)
+                .peek(ev -> listEndpoint.add("/events/" + ev.getId())).toList();
+
+        StatsParams statsParams = StatsParams.builder()
+                .uris(listEndpoint)
+                .unique(false)
+                .start()
+                .end(LocalDateTime.now());
+        statClient.getStats()
 
         statClient.saveStats()
 
+        return null;
     }
 
     @Override
-    public List<EventFullDto> find(AdminEventRequestParams params) {
-        return List.of();
-    }
-
-    @Override
-    public EventFullDto findById(long eventId) {
+    public EventFullDto getById(long eventId) {
 
         return eventMapper.toFullDto(getEvent(eventId));
     }
 
     @Override
-    public List<EventFullDto> getEvents(long userId, int from, int size) {
-        return List.of();
-    }
-
-    @Override
     @Transactional
-    public EventFullDto create(long userId, NewEventDto event) {
-        return null;
+    public EventFullDto createEvent(long userId, NewEventDto event) {
+        User user = getUser(userId);
+        if (event.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
+            throw new ConflictException("Different with now less than 2 hours");
+        }
+
+        Event entity = eventMapper.toEntity(event, LocalDateTime.now(), user, EventState.PUBLISHED);
+        Event saved = eventRepository.save(entity);
+
+        return eventMapper.toFullDto(saved, 0, 0);
     }
 
     @Override
@@ -103,20 +114,10 @@ public class EventServiceImpl implements EventService {
         return null;
     }
 
-    @Override
-    public EventFullDto getById(long eventId) {
-        return null;
-    }
 
     @Override
     @Transactional
-    public EventFullDto update(long userId, long eventId, NewEventDto event) {
-        return null;
-    }
-
-    @Override
-    @Transactional
-    public EventFullDto update(long eventId, NewEventDto event) {
+    public EventFullDto updateEvent(long userId, long eventId, UpdateEventUserRequest event) {
         return null;
     }
 
@@ -128,5 +129,9 @@ public class EventServiceImpl implements EventService {
     private Event getEvent(long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found with id: " + eventId));
+    }
+
+    private User getUser(long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found with id" + userId));
     }
 }

@@ -1,9 +1,6 @@
 package ru.practicum.event.service;
 
-import ru.practicum.event.dto.AdminEventRequestParams;
-import ru.practicum.event.dto.EventFullDto;
-import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.PublicEventRequestParams;
+import ru.practicum.event.dto.*;
 import ru.practicum.event.model.Event;
 
 import java.util.Collection;
@@ -11,23 +8,26 @@ import java.util.List;
 
 public interface EventService {
 
-    List<EventFullDto> find(PublicEventRequestParams params);
+    //Public GET /events
+    List<EventShortDto> getEvents(PublicEventRequestParams params);
 
-    List<EventFullDto> find(AdminEventRequestParams params);
-
-    EventFullDto findById(long id);
-
-    List<EventFullDto> getEvents(long userId, int from, int size);
-
-    EventFullDto create(long userId, NewEventDto event);
-
-    EventFullDto getById(long userId, long eventId);
-
+    //Public GET /events/{eventId}
     EventFullDto getById(long eventId);
 
-    EventFullDto update(long userId, long eventId, NewEventDto event);
+    // GET Admin/events
+    List<EventFullDto> getEvents(AdminEventRequestParams params);
 
-    EventFullDto update(long eventId, NewEventDto event);
+    //Private GET /users/{userId}/events
+    List<EventShortDto> getEvents(PrivateEventRequestParams params);
+
+    //Private /users/{userId}/events/{eventsId}
+    EventFullDto getById(long userId, long eventId);
+
+    EventFullDto createEvent(long userId, NewEventDto event);
+
+    EventFullDto updateEvent(long userId, long eventId, UpdateEventUserRequest event);
+
+    EventFullDto updateEvent(long eventId, UpdateEventAdminRequest event);
 
     Collection<Event> getByIds(List<Long> events);
 }
