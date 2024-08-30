@@ -16,8 +16,8 @@ import ru.practicum.event.model.QEvent;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exeption.ConflictException;
 import ru.practicum.exeption.NotFoundException;
-import ru.practicum.location.Location;
-import ru.practicum.location.LocationRepository;
+import ru.practicum.location.model.Location;
+import ru.practicum.location.repository.LocationRepository;
 import ru.practicum.request.dto.EventCountByRequest;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.stat.StatsParams;
@@ -46,7 +46,7 @@ public class EventServiceImpl implements EventService {
     private final LocationRepository locationRepository;
 
     @Override
-    public List<EventShortDto> getEvents(PublicEventRequestParams params) {
+    public List<EventShortDto> getAll(PublicEventRequestParams params) {
         QEvent event = QEvent.event;
         List<BooleanExpression> conditions = new ArrayList<>();
 
@@ -126,32 +126,34 @@ public class EventServiceImpl implements EventService {
         long views = stats.getFirst().getHits();
 
         // statClient.saveStats();//TODO
-        return eventMapper.toFullDto(event, views, requests);
+        return eventMapper.toEventFullDto(event);
     }
 
     @Override
-    public List<EventFullDto> getEvents(AdminEventRequestParams params) {
+    public List<EventFullDto> getAll(AdminEventRequestParams params) {
         return List.of();
     }
 
     @Override
-    public List<EventShortDto> getEvents(PrivateEventRequestParams params) {
+    public List<EventShortDto> getAll(PrivateEventRequestParams params) {
         return List.of();
     }
 
     @Override
     @Transactional
-    public EventFullDto createEvent(long userId, NewEventDto event) {
-        User user = getUser(userId);
+    public EventFullDto create(long userId, NewEventDto event) {
+        User initiator = getUser(userId);
         if (event.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
             throw new ConflictException("Different with now less than 2 hours");
         }
-        Category category = categoryRepository.getById(Long.valueOf(event.getCategory()));
+        Category category = categoryRepository.getById(event.getCategory());
         Location location = locationRepository.save(event.getLocation());
-        Event entity = eventMapper.toEntity(event, LocalDateTime.now(), user, EventState.PUBLISHED, category,location);
+
+        Event entity = eventMapper.toEvent(event, LocalDateTime.now(), initiator, EventState.PUBLISHED, category,
+                location, 0, 0);
         Event saved = eventRepository.save(entity);
 
-        return eventMapper.toFullDto(saved, 0, 0);
+        return eventMapper.toEventFullDto(saved);
     }
 
     @Override
@@ -161,12 +163,12 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventFullDto updateEvent(long userId, long eventId, UpdateEventUserRequest event) {
+    public EventFullDto update(long userId, long eventId, UpdateEventUserRequest event) {
         return null;
     }
 
     @Override
-    public EventFullDto updateEvent(long eventId, UpdateEventAdminRequest event) {
+    public EventFullDto update(long eventId, UpdateEventAdminRequest event) {
         return null;
     }
 

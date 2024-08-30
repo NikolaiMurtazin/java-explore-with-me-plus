@@ -1,14 +1,17 @@
 package ru.practicum.event.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.client.StatClient;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.PublicEventRequestParams;
 import ru.practicum.event.model.Sort;
 import ru.practicum.event.service.EventService;
 import ru.practicum.exeption.WrongDateException;
+import ru.practicum.stat.EndpointHitDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -19,6 +22,8 @@ import java.util.Map;
 @RequestMapping("/events")
 public class PublicEventsController {
     private final EventService eventService;
+
+    private final StatClient statClient;
 
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
@@ -32,7 +37,10 @@ public class PublicEventsController {
                                               @RequestParam(value = "onlyAvailable", defaultValue = "false") Boolean onlyAvailable,
                                               @RequestParam(value = "sort", required = false) Sort sort,
                                               @RequestParam(value = "from", defaultValue = "0") int from,
-                                              @RequestParam(value = "size", defaultValue = "10") int size) {
+                                              @RequestParam(value = "size", defaultValue = "10") int size,
+                                              HttpServletRequest request) {
+
+        sendStats(request);
 
         Map<String, LocalDateTime> ranges = validDate(rangeStart, rangeEnd);
         PublicEventRequestParams params = PublicEventRequestParams.builder()
@@ -46,13 +54,16 @@ public class PublicEventsController {
                 .from(from)
                 .size(size)
                 .build();
-        eventService.getEvents(params);
+        eventService.getAll(params);
         return List.of();
     }
 
     @GetMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto getEvent(@PathVariable("eventId") long eventId) {
+    public EventFullDto getEvent(@PathVariable("eventId") long eventId, HttpServletRequest request) {
+
+        sendStats(request);
+
         return eventService.getById(eventId);
     }
 
@@ -67,5 +78,17 @@ public class PublicEventsController {
             return Map.of("rangeStart", rangeStart,
                     "rangeEnd", rangeEnd);
         }
+    }
+
+    private void sendStats(HttpServletRequest request) {
+        String ip = request.getRemoteAddr();
+        String uri = request.getRequestURI();
+        EndpointHitDTO dto = EndpointHitDTO.builder()
+                .app("ewm-main-service")
+                .ip(ip)
+                .uri(uri)
+                .timestamp(LocalDateTime.now())
+                .build();
+        statClient.saveStats(dto);
     }
 }
