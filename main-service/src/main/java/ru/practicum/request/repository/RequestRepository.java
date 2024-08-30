@@ -40,6 +40,11 @@ public interface RequestRepository extends JpaRepository<Request, Long>, Queryds
             "WHERE r.EVENT_ID = ?1 AND r.status= 'CONFIRMED'", nativeQuery = true)
     boolean isParticipantLimitReached(long eventId, int limit);
 
+    @Query(value = "SELECT COUNT(r.request_id) AS count " +
+            "FROM requests r " +
+            "WHERE r.event_id = ?1 AND r.status = 'CONFIRMED' ",
+            nativeQuery = true)
+    Long countConfirmedRequest(long eventId);
 
     List<Request> findByEventAndRequesterAndStatusIn(Event event, User requester, List<RequestStatus> states);
 
