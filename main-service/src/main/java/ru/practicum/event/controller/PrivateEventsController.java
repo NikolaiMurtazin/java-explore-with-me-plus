@@ -44,21 +44,21 @@ public class PrivateEventsController {
         return eventService.getEvents(new PrivateEventRequestParams(userId, from, size));
     }
 
-    @PostMapping("{userId}/events")
+    @PostMapping("/{userId}/events")
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto createEvent(@PathVariable("userId") long userId,
                                     @Valid @RequestBody NewEventDto event) {
         return eventService.createEvent(userId, event);
     }
 
-    @GetMapping("{userId}/events/{eventId}")
+    @GetMapping("/{userId}/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto getEventById(@PathVariable("userId") long userId,
                                      @PathVariable("eventId") long eventId) {
         return eventService.getById(userId, eventId);
     }
 
-    @PatchMapping("{userId}/events/{eventId}")
+    @PatchMapping("/{userId}/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto updateEvent(@PathVariable("userId") long userId,
                                     @PathVariable("eventId") long eventId,
@@ -66,7 +66,7 @@ public class PrivateEventsController {
         return eventService.updateEvent(userId, eventId, event);
     }
 
-    @GetMapping("{userId}/event/{eventId}/requests")
+    @GetMapping("/{userId}/event/{eventId}/requests")
     @ResponseStatus(HttpStatus.OK)
     public List<ParticipationRequestDto> getRequestsOnUserEvent(@PathVariable("userId") long userId,
                                                                 @PathVariable("eventId") long eventId) {
@@ -74,7 +74,7 @@ public class PrivateEventsController {
         return requestService.findRequestsOnUserEvent(userId, eventId);
     }
 
-    @PatchMapping("{userId}/event/{eventId}/requests")
+    @PatchMapping("/{userId}/event/{eventId}/requests")
     @ResponseStatus(HttpStatus.OK)
     public EventRequestStatusUpdateResult UpdateStatusRequestByUserAndEventId(@PathVariable("userId") long userId,
                                                                               @PathVariable("eventId") long eventId,
