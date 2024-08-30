@@ -1,22 +1,21 @@
 package ru.practicum.event.dto;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.event.model.Location;
+import ru.practicum.location.Location;
 
 import java.time.LocalDateTime;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+//@Builder
 public class NewEventDto {
     @NotBlank
     @Size(min = 20, max = 2000, message = "The length of the annotation must be at least 20 characters and no more than 2000 characters")
@@ -30,15 +29,14 @@ public class NewEventDto {
     private String description;
 
     @NotNull(message = "EventDate can't be blank")
-    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
 
     @NotNull(message = "Location can't be blank")
     private Location location;
 
     private Boolean paid;
-
-    @Size(message = "participant must be more or equal 0")
+    @Min(value = 0, message = "participant must be more or equal 0")
     private Integer participantLimit;
 
     private Boolean requestModeration;

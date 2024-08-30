@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import ru.practicum.category.dto.CategoryDto;
-import ru.practicum.event.model.Location;
+import ru.practicum.location.Location;
 
 import java.time.LocalDateTime;
 

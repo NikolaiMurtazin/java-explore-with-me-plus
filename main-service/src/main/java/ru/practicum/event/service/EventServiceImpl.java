@@ -16,6 +16,8 @@ import ru.practicum.event.model.QEvent;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exeption.ConflictException;
 import ru.practicum.exeption.NotFoundException;
+import ru.practicum.location.Location;
+import ru.practicum.location.LocationRepository;
 import ru.practicum.request.dto.EventCountByRequest;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.stat.StatsParams;
@@ -41,6 +43,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final CategoryRepository categoryRepository;
+    private final LocationRepository locationRepository;
 
     @Override
     public List<EventShortDto> getEvents(PublicEventRequestParams params) {
@@ -144,7 +147,8 @@ public class EventServiceImpl implements EventService {
             throw new ConflictException("Different with now less than 2 hours");
         }
         Category category = categoryRepository.getById(Long.valueOf(event.getCategory()));
-        Event entity = eventMapper.toEntity(event, LocalDateTime.now(), user, EventState.PUBLISHED, category);
+        Location location = locationRepository.save(event.getLocation());
+        Event entity = eventMapper.toEntity(event, LocalDateTime.now(), user, EventState.PUBLISHED, category,location);
         Event saved = eventRepository.save(entity);
 
         return eventMapper.toFullDto(saved, 0, 0);
