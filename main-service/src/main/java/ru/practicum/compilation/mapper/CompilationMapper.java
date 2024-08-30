@@ -21,6 +21,4 @@ public interface CompilationMapper {
     Compilation toEntity(final NewCompilationDto newCompilationDto, final Collection<Event> events);
 
     CompilationDto toCompilationDto(final Compilation compilation, List<EventShortDto> list);
-
-    List<CompilationDto> mapToCompilationDto(final Iterable<Compilation> compilations);
 }
