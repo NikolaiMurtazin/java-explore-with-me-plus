@@ -10,6 +10,7 @@ import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.model.EventState;
+import ru.practicum.location.Location;
 import ru.practicum.user.model.User;
 
 import java.time.LocalDateTime;
@@ -23,7 +24,9 @@ public interface EventMapper {
     @Mapping(target = "initiator", source = "user")
     @Mapping(target = "state", source = "state")
     @Mapping(target = "category", source = "category")
-    Event toEntity(final NewEventDto newEventDto, LocalDateTime now, User user, EventState state, Category category);
+    @Mapping(target = "location", source = "location")
+//TODO
+    Event toEntity(final NewEventDto newEventDto, LocalDateTime now, User user, EventState state, Category category, Location location);
 
     @Mapping(target = "views", source = "views")
     @Mapping(target = "confirmedRequests", source = "confirmedRequests")
