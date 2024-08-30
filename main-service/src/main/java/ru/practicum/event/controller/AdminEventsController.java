@@ -18,7 +18,8 @@ import java.util.Map;
 
 @Validated
 @RequiredArgsConstructor
-@RestController("/admin")
+@RestController
+@RequestMapping(("/admin"))
 public class AdminEventsController {
 
     private final EventService eventService;
@@ -43,8 +44,7 @@ public class AdminEventsController {
                 .from(from)
                 .size(size)
                 .build();
-
-        return List.of();
+        return eventService.getEvents(params);
     }
 
     @PatchMapping("/events/{eventId}")

@@ -1,44 +1,26 @@
 package ru.practicum.compilation.mapper;
 
-import lombok.RequiredArgsConstructor;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.model.Compilation;
-import ru.practicum.event.mapper.EventMapper;
+import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.model.Event;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
-@RequiredArgsConstructor
-public class CompilationMapper {
-    private final EventMapper eventMapper;
+public interface CompilationMapper {
 
-    public Compilation toCompilation(final NewCompilationDto newCompilationDto, final Collection<Event> events) {
-        return Compilation.builder()
-                .pinned(newCompilationDto.isPinned())
-                .title(newCompilationDto.getTitle())
-                .events(events)
-                .build();
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "events", source = "events")
+    Compilation toEntity(final NewCompilationDto newCompilationDto, final Collection<Event> events);
 
-    public CompilationDto toCompilationDto(final Compilation compilation) {
-        return CompilationDto.builder()
-                .events(compilation.getEvents().stream()
-                        .map(eventMapper::toShortDto)
-                        .collect(Collectors.toList()))
-                .id(compilation.getId())
-                .pinned(compilation.getPinned())
-                .title(compilation.getTitle())
-                .build();
-    }
+    CompilationDto toCompilationDto(final Compilation compilation, List<EventShortDto> list);
 
-    List<CompilationDto> mapToCompilationDto(final Iterable<Compilation> compilations) {
-
-    }
+    List<CompilationDto> mapToCompilationDto(final Iterable<Compilation> compilations);
 }
