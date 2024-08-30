@@ -61,7 +61,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (newCompilationDto.getEvents() != null) {
             compilation.setEvents(eventService.getByIds(newCompilationDto.getEvents()));
         }
-        if (newCompilationDto.getTitle() != null ) {
+        if (newCompilationDto.getTitle() != null) {
             compilation.setTitle(newCompilationDto.getTitle());
         }
         compilation.setPinned(newCompilationDto.isPinned());
