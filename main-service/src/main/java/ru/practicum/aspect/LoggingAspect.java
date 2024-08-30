@@ -25,9 +25,9 @@ public class LoggingAspect {
     }
 
     @AfterReturning(pointcut = "execution(* ru.practicum.admin.controller.*.*(..)) || " +
-                               "execution(* ru.practicum.category.controller.*.*(..)) || " +
-                               "execution(* ru.practicum.event.controller.*.*(..)) || " +
-                               "execution(* ru.practicum.user.controller.*.*(..))", returning = "result")
+            "execution(* ru.practicum.category.controller.*.*(..)) || " +
+            "execution(* ru.practicum.event.controller.*.*(..)) || " +
+            "execution(* ru.practicum.user.controller.*.*(..))", returning = "result")
     public void logAfter(JoinPoint joinPoint, Object result) {
         log.info("Method Return value : {}", result);
         log.info("Exiting from Method :  {}", joinPoint.getSignature().getName());

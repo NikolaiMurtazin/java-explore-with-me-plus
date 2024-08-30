@@ -17,6 +17,9 @@ import ru.practicum.exeption.NotFoundException;
 import ru.practicum.request.dto.EventCountByRequest;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.stat.StatsParams;
+import ru.practicum.stat.ViewStatsDTO;
+import ru.practicum.user.dto.UserShortDto;
+import ru.practicum.user.mapper.UserMapper;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
@@ -24,6 +27,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +39,7 @@ public class EventServiceImpl implements EventService {
     private final RequestRepository requestRepository;
     private final StatClient statClient;
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @Override
     public List<EventShortDto> getEvents(PublicEventRequestParams params) {
@@ -66,33 +71,69 @@ public class EventServiceImpl implements EventService {
         List<Event> events = eventRepository.findAll(finalConditional, pageRequest).getContent();
         List<Long> listEventIds = events.stream().map(Event::getId).toList();
         List<String> listEndpoint = new ArrayList<>();
-// TODO add 2 request to database
-        List<EventCountByRequest> listEvents;
-        if (params.getOnlyAvailable()) {
-            listEvents = requestRepository.findConfirmedRequestWithoutLimitCheck(listEventIds);
-        } else {
-            listEvents = requestRepository.findConfirmedRequestWithLimitCheck(listEventIds);
-        }
-        List<Event> finalList = events.stream()
-                .filter(listEvents::contains)
-                .peek(ev -> listEndpoint.add("/events/" + ev.getId())).toList();
 
+        List<EventCountByRequest> eventsIdWithViews;
+        if (params.getOnlyAvailable()) {
+            eventsIdWithViews = requestRepository.findConfirmedRequestWithoutLimitCheck(listEventIds);
+        } else {
+            eventsIdWithViews = requestRepository.findConfirmedRequestWithLimitCheck(listEventIds);
+        }
+        eventsIdWithViews.stream().peek(ev -> listEndpoint.add("/event/" + ev.getEventId())).close();
         StatsParams statsParams = StatsParams.builder()
                 .uris(listEndpoint)
                 .unique(false)
-                .start()
-                .end(LocalDateTime.now());
-        statClient.getStats()
+                .start(LocalDateTime.MIN)
+                .end(LocalDateTime.now())
+                .end(LocalDateTime.now()).build();
 
-        statClient.saveStats()
+        List<ViewStatsDTO> viewStatsDTOS = statClient.getStats(statsParams);
 
-        return null;
+        List<EventShortDto> returnList = eventsIdWithViews.stream().map(ev -> {
+            Event finalEvent = events.get((int) ev.getEventId());
+            Optional<ViewStatsDTO> first = viewStatsDTOS.stream().filter(stat -> stat.getUri().equals("/event/" + ev.getEventId())).findFirst();
+            long views = first.map(ViewStatsDTO::getHits).orElse(0L);
+            long countConfirmedRequest = ev.getCount();
+            UserShortDto userShortDto = userMapper.toUserShortDto(finalEvent.getInitiator());
+            return eventMapper.toShortDto(finalEvent, views, userShortDto, countConfirmedRequest);
+        }).toList();
+
+//        EndpointHitDTO hitDTO = new EndpointHitDTO()
+//        statClient.saveStats(hitDTO);
+//TODO
+        return returnList;
     }
 
     @Override
     public EventFullDto getById(long eventId) {
+        Event event = getEvent(eventId);
+        if (!event.getState().equals(EventState.PUBLISHED)) {
+            throw new NotFoundException("Event is not published");
+        }
 
-        return eventMapper.toFullDto(getEvent(eventId));
+        Long requests = requestRepository.countConfirmedRequest(eventId);
+
+        List<String> listEndpoint = List.of("/event/" + event.getId());
+        StatsParams statsParams = StatsParams.builder()
+                .uris(listEndpoint)
+                .unique(false)
+                .start(LocalDateTime.MIN)
+                .end(LocalDateTime.now())
+                .end(LocalDateTime.now()).build();
+        List<ViewStatsDTO> stats = statClient.getStats(statsParams);
+        long views = stats.getFirst().getHits();
+
+        // statClient.saveStats();//TODO
+        return eventMapper.toFullDto(event, views, requests);
+    }
+
+    @Override
+    public List<EventFullDto> getEvents(AdminEventRequestParams params) {
+        return List.of();
+    }
+
+    @Override
+    public List<EventShortDto> getEvents(PrivateEventRequestParams params) {
+        return List.of();
     }
 
     @Override
@@ -114,10 +155,14 @@ public class EventServiceImpl implements EventService {
         return null;
     }
 
-
     @Override
     @Transactional
     public EventFullDto updateEvent(long userId, long eventId, UpdateEventUserRequest event) {
+        return null;
+    }
+
+    @Override
+    public EventFullDto updateEvent(long eventId, UpdateEventAdminRequest event) {
         return null;
     }
 
