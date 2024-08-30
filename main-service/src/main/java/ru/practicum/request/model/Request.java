@@ -37,5 +37,5 @@ public class Request {
     User requester;
 
     @Enumerated(EnumType.STRING)
-    RequestState status;
+    RequestStatus status;
 }

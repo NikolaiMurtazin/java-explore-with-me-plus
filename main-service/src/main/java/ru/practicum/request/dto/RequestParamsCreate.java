@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RequestParams {
+public class RequestParamsCreate {
 
     private long userId;
     private long eventId;

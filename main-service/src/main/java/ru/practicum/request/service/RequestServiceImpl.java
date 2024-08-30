@@ -8,11 +8,13 @@ import ru.practicum.event.model.EventState;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exeption.ConflictException;
 import ru.practicum.exeption.NotFoundException;
+import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
-import ru.practicum.request.dto.RequestParams;
+import ru.practicum.request.dto.RequestParamsCreate;
+import ru.practicum.request.dto.RequestParamsUpdate;
 import ru.practicum.request.mapper.RequestMapper;
 import ru.practicum.request.model.Request;
-import ru.practicum.request.model.RequestState;
+import ru.practicum.request.model.RequestStatus;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
@@ -31,7 +33,7 @@ public class RequestServiceImpl implements RequestService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
 
-
+    @Override
     public List<ParticipationRequestDto> findUserRequests(long userId) {
         User user = getUser(userId);
         List<Request> allRequests = requestRepository.findByRequester(user);
@@ -44,7 +46,8 @@ public class RequestServiceImpl implements RequestService {
 
 
     @Transactional
-    public ParticipationRequestDto save(RequestParams params) {
+    @Override
+    public ParticipationRequestDto save(RequestParamsCreate params) {
         User requester = getUser(params.getUserId());
         Event event = getEvent(params.getEventId());
         ParticipationRequestDto dto = params.getDto();
@@ -54,16 +57,15 @@ public class RequestServiceImpl implements RequestService {
         if (event.getInitiator().equals(dto.getRequester())) {
             throw new ConflictException("Requester couldn't be initiator");
         }
-        if (!requestRepository.findByEventAndRequester(event, requester).isEmpty()) {
+        List<RequestStatus> states = List.of(RequestStatus.PENDING, RequestStatus.CONFIRMED);
+        if (!requestRepository.findByEventAndRequesterAndStatusIn(event, requester, states).isEmpty()) {
             throw new ConflictException("Repeatable request not allowed");
         }
-        if(requestRepository.isParticipantLimitReached(event.getId())){
-            throw new ConflictException("Request limit reached");
-        }
+        checkEventRequestLimit(event);
         if (!event.getRequestModeration()) {
-            dto.setStatus(RequestState.CONFIRMED);
+            dto.setStatus(RequestStatus.CONFIRMED);
         } else {
-            dto.setStatus(RequestState.PENDING);
+            dto.setStatus(RequestStatus.PENDING);
         }
 
         Request saved = requestRepository.save(requestMapper.toEntity(dto));
@@ -71,19 +73,36 @@ public class RequestServiceImpl implements RequestService {
         return requestMapper.toDto(saved);
     }
 
+    private void checkEventRequestLimit(Event event) {
+        if (requestRepository.isParticipantLimitReached(event.getId(), event.getParticipantLimit())) {
+            throw new ConflictException("Request limit reached");
+        }
+    }
+
+    @Override
+    public EventRequestStatusUpdateResult updateStatus(RequestParamsUpdate params) {
+        User user = getUser(params.getUserId());
+        Event event = getUserEvent(params.getEventId(), user);
+        checkEventRequestLimit(event);
+        return null;
+    }
+
     @Transactional
+    @Override
     public ParticipationRequestDto cancel(long userId, long requestId) {
         getUser(userId);
         Request request = getRequest(requestId);
-        request.setStatus(RequestState.REJECTED);
+        request.setStatus(RequestStatus.REJECTED);
         Request saved = requestRepository.save(request);
         return requestMapper.toDto(saved);
     }
 
-    public List<ParticipationRequestDto> findUserRequestOnEvent(long userId, long eventId) {
+    @Override
+    public List<ParticipationRequestDto> findRequestsOnUserEvent(long userId, long eventId) {
         User user = getUser(userId);
-        Event event = getEvent(eventId);
-        List<Request> allRequests = requestRepository.findByEventAndEvent_Initiator(event, user);
+        Event event = getUserEvent(eventId, user);
+
+        List<Request> allRequests = requestRepository.findByEvent(event);
         if (allRequests.isEmpty()) {
             return List.of();
         }
@@ -101,5 +120,9 @@ public class RequestServiceImpl implements RequestService {
 
     private Event getEvent(long eventId) {
         return eventRepository.findById(eventId).orElseThrow(() -> new NotFoundException("Event not found with id" + eventId));
+    }
+
+    private Event getUserEvent(long eventId, User user) {
+        return eventRepository.findByIdAndInitiator(eventId, user).orElseThrow(() -> new NotFoundException("Event not found with id" + eventId + "for user" + user.getId()));
     }
 }
