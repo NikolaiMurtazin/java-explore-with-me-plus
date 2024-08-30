@@ -11,14 +11,13 @@ import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.model.Event;
 
 import java.util.Collection;
-import java.util.List;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface CompilationMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "events", source = "events")
-    Compilation toEntity(final NewCompilationDto newCompilationDto, final Collection<Event> events);
+    Compilation toCompilation(final NewCompilationDto newCompilationDto, final Collection<Event> events);
 
-    CompilationDto toCompilationDto(final Compilation compilation, List<EventShortDto> list);
+    CompilationDto toCompilationDto(final Compilation compilation, Collection<EventShortDto> list);
 }

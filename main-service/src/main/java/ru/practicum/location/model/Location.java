@@ -1,5 +1,6 @@
-package ru.practicum.location;
+package ru.practicum.location.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,6 +14,7 @@ import lombok.*;
 public class Location {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonIgnore
     @Column(name = "location_id")
     private long id;
     @Column(name = "lat", nullable = false)

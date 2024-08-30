@@ -41,14 +41,14 @@ public class PrivateEventsController {
                                          @RequestParam(value = "from", defaultValue = "0") int from,
                                          @RequestParam(value = "size", defaultValue = "10") int size) {
 
-        return eventService.getEvents(new PrivateEventRequestParams(userId, from, size));
+        return eventService.getAll(new PrivateEventRequestParams(userId, from, size));
     }
 
     @PostMapping("/{userId}/events")
     @ResponseStatus(HttpStatus.CREATED)
-    public EventFullDto createEvent(@PathVariable("userId") long userId,
-                                    @Valid @RequestBody NewEventDto event) {
-        return eventService.createEvent(userId, event);
+    public EventFullDto create(@PathVariable("userId") long userId,
+                               @Valid @RequestBody NewEventDto event) {
+        return eventService.create(userId, event);
     }
 
     @GetMapping("/{userId}/events/{eventId}")
@@ -63,7 +63,7 @@ public class PrivateEventsController {
     public EventFullDto updateEvent(@PathVariable("userId") long userId,
                                     @PathVariable("eventId") long eventId,
                                     @RequestBody UpdateEventUserRequest event) {
-        return eventService.updateEvent(userId, eventId, event);
+        return eventService.update(userId, eventId, event);
     }
 
     @GetMapping("/{userId}/event/{eventId}/requests")

@@ -14,9 +14,10 @@ import java.util.Arrays;
 @Slf4j
 public class LoggingAspect {
 
-    @Before("execution(* ru.practicum.admin.controller.*.*(..)) || " +
-            "execution(* ru.practicum.category.controller.*.*(..)) || " +
+    @Before("execution(* ru.practicum.category.controller.*.*(..)) || " +
+            "execution(* ru.practicum.compilation.controller.*.*(..)) || " +
             "execution(* ru.practicum.event.controller.*.*(..)) || " +
+            "execution(* ru.practicum.request.controller.*.*(..)) || " +
             "execution(* ru.practicum.user.controller.*.*(..))")
     public void logBefore(JoinPoint joinPoint) {
         log.info("Entering in Method :  {}", joinPoint.getSignature().getName());
@@ -24,10 +25,11 @@ public class LoggingAspect {
         log.info("Arguments :  {}", Arrays.toString(joinPoint.getArgs()));
     }
 
-    @AfterReturning(pointcut = "execution(* ru.practicum.admin.controller.*.*(..)) || " +
-            "execution(* ru.practicum.category.controller.*.*(..)) || " +
-            "execution(* ru.practicum.event.controller.*.*(..)) || " +
-            "execution(* ru.practicum.user.controller.*.*(..))", returning = "result")
+    @AfterReturning(pointcut = "execution(* ru.practicum.category.controller.*.*(..)) || " +
+                               "execution(* ru.practicum.compilation.controller.*.*(..)) || " +
+                               "execution(* ru.practicum.event.controller.*.*(..)) || " +
+                               "execution(* ru.practicum.request.controller.*.*(..)) || " +
+                               "execution(* ru.practicum.user.controller.*.*(..))", returning = "result")
     public void logAfter(JoinPoint joinPoint, Object result) {
         log.info("Method Return value : {}", result);
         log.info("Exiting from Method :  {}", joinPoint.getSignature().getName());

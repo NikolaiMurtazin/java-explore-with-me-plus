@@ -9,25 +9,25 @@ import java.util.List;
 public interface EventService {
 
     //Public GET /events
-    List<EventShortDto> getEvents(PublicEventRequestParams params);
+    List<EventShortDto> getAll(PublicEventRequestParams params);
 
     //Public GET /events/{eventId}
     EventFullDto getById(long eventId);
 
     // GET Admin/events
-    List<EventFullDto> getEvents(AdminEventRequestParams params);
+    List<EventFullDto> getAll(AdminEventRequestParams params);
 
     //Private GET /users/{userId}/events
-    List<EventShortDto> getEvents(PrivateEventRequestParams params);
+    List<EventShortDto> getAll(PrivateEventRequestParams params);
 
     //Private /users/{userId}/events/{eventsId}
     EventFullDto getById(long userId, long eventId);
 
-    EventFullDto createEvent(long userId, NewEventDto event);
+    EventFullDto create(long userId, NewEventDto event);
 
-    EventFullDto updateEvent(long userId, long eventId, UpdateEventUserRequest event);
+    EventFullDto update(long userId, long eventId, UpdateEventUserRequest event);
 
-    EventFullDto updateEvent(long eventId, UpdateEventAdminRequest event);
+    EventFullDto update(long eventId, UpdateEventAdminRequest event);
 
     Collection<Event> getByIds(List<Long> events);
 }
