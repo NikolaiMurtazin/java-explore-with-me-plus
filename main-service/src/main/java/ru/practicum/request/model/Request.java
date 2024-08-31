@@ -19,23 +19,22 @@ import java.time.LocalDateTime;
 public class Request {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
+    private Long id;
 
     @Column(name = "description")
-    String description;
+    private String description;
 
     @Column(name = "created")
-    LocalDateTime created;
-
+    private LocalDateTime created;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
-    Event event;
+    private Event event;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requester_id")
-    User requester;
+    private User requester;
 
     @Enumerated(EnumType.STRING)
-    RequestStatus status;
+    private RequestStatus status;
 }
