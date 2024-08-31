@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
-import ru.practicum.event.dto.PrivateEventRequestParams;
+import ru.practicum.event.dto.PrivateEventParams;
 import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.service.EventService;
 import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
@@ -30,43 +30,43 @@ import java.util.List;
 @Validated
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/users")
+@RequestMapping("/users/{userId}/events")
 public class PrivateEventsController {
     private final EventService eventService;
     private final RequestService requestService;
 
-    @GetMapping("/{userId}/events")
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<EventShortDto> getEvents(@PathVariable("userId") long userId,
-                                         @RequestParam(value = "from", defaultValue = "0") int from,
-                                         @RequestParam(value = "size", defaultValue = "10") int size) {
+    public List<EventShortDto> getAll(@PathVariable("userId") long userId,
+                                      @RequestParam(value = "from", defaultValue = "0") int from,
+                                      @RequestParam(value = "size", defaultValue = "10") int size) {
 
-        return eventService.getAll(new PrivateEventRequestParams(userId, from, size));
+        return eventService.getAll(new PrivateEventParams(userId, from, size));
     }
 
-    @PostMapping("/{userId}/events")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto create(@PathVariable("userId") long userId,
                                @Valid @RequestBody NewEventDto event) {
         return eventService.create(userId, event);
     }
 
-    @GetMapping("/{userId}/events/{eventId}")
+    @GetMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto getEventById(@PathVariable("userId") long userId,
-                                     @PathVariable("eventId") long eventId) {
+    public EventFullDto getById(@PathVariable("userId") long userId,
+                                @PathVariable("eventId") long eventId) {
         return eventService.getById(userId, eventId);
     }
 
-    @PatchMapping("/{userId}/events/{eventId}")
+    @PatchMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto updateEvent(@PathVariable("userId") long userId,
-                                    @PathVariable("eventId") long eventId,
-                                    @RequestBody UpdateEventUserRequest event) {
+    public EventFullDto update(@PathVariable("userId") long userId,
+                               @PathVariable("eventId") long eventId,
+                               @RequestBody UpdateEventUserRequest event) {
         return eventService.update(userId, eventId, event);
     }
 
-    @GetMapping("/{userId}/event/{eventId}/requests")
+    @GetMapping("/{eventId}/requests")
     @ResponseStatus(HttpStatus.OK)
     public List<ParticipationRequestDto> getRequestsOnUserEvent(@PathVariable("userId") long userId,
                                                                 @PathVariable("eventId") long eventId) {
@@ -74,9 +74,9 @@ public class PrivateEventsController {
         return requestService.findRequestsOnUserEvent(userId, eventId);
     }
 
-    @PatchMapping("/{userId}/event/{eventId}/requests")
+    @PatchMapping("/{eventId}/requests")
     @ResponseStatus(HttpStatus.OK)
-    public EventRequestStatusUpdateResult UpdateStatusRequestByUserAndEventId(@PathVariable("userId") long userId,
+    public EventRequestStatusUpdateResult updateStatusRequestByUserAndEventId(@PathVariable("userId") long userId,
                                                                               @PathVariable("eventId") long eventId,
                                                                               @RequestBody EventRequestStatusUpdateRequest updateDto) {
 

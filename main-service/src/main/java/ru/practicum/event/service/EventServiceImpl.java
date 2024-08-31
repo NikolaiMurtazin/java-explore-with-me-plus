@@ -30,6 +30,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 @Service
 @RequiredArgsConstructor
@@ -97,7 +99,7 @@ public class EventServiceImpl implements EventService {
             Optional<ViewStatsDTO> first = viewStatsDTOS.stream().filter(stat -> stat.getUri().equals("/event/" + ev.getEventId())).findFirst();
             long views = first.map(ViewStatsDTO::getHits).orElse(0L);
             long countConfirmedRequest = ev.getCount();
-            return eventMapper.toShortDto(finalEvent, views, countConfirmedRequest);
+            return eventMapper.toEventShortDto(finalEvent);
         }).toList();
 
 //        EndpointHitDTO hitDTO = new EndpointHitDTO()
@@ -134,28 +136,46 @@ public class EventServiceImpl implements EventService {
         return List.of();
     }
 
+//    Приватные пользователи
+
     @Override
-    public List<EventShortDto> getAll(PrivateEventRequestParams params) {
-        return List.of();
+    public List<EventShortDto> getAll(PrivateEventParams params) { // готов
+        QEvent event = QEvent.event;
+        List<BooleanExpression> conditions = new ArrayList<>();
+        conditions.add(event.initiator.id.eq(params.getUserId()));
+        BooleanExpression finalCondition = conditions.stream()
+                .reduce(BooleanExpression::and)
+                .orElse(null);
+
+        PageRequest pageRequest = PageRequest.of(params.getFrom() / params.getSize(), params.getSize());
+
+        Iterable<Event> compilationsIterable = eventRepository.findAll(finalCondition, pageRequest);
+
+        List<Event> compilations = StreamSupport.stream(compilationsIterable.spliterator(), false)
+                .toList();
+
+        return compilations.stream()
+                .map(eventMapper::toEventShortDto)
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public EventFullDto create(long userId, NewEventDto event) {
+    public EventFullDto create(long userId, NewEventDto eventDto) { // готово
         User initiator = getUser(userId);
-        if (event.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
+        if (eventDto.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
             throw new ConflictException("Different with now less than 2 hours");
         }
-        Category category = categoryRepository.getById(event.getCategory());
-        Location location = locationRepository.save(event.getLocation());
+        Category category = categoryRepository.findById(eventDto.getCategory())
+                .orElseThrow(() -> new NotFoundException("Category with id= " + eventDto.getCategory() + " was not found"));
+        Location location = locationRepository.save(eventDto.getLocation());
 
-        Event entity = eventMapper.toEvent(event, LocalDateTime.now(), initiator, EventState.PUBLISHED, category,
-                location, 0, 0);
-        Event saved = eventRepository.save(entity);
+        Event event = eventMapper.toEvent(eventDto, category, location, initiator, EventState.PENDING, LocalDateTime.now());
+        Event saved = eventRepository.save(event);
 
         return eventMapper.toEventFullDto(saved);
     }
-
+//
     @Override
     public EventFullDto getById(long userId, long eventId) {
         return null;
