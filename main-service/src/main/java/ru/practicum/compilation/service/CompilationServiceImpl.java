@@ -86,7 +86,7 @@ public class CompilationServiceImpl implements CompilationService {
             } else {
                 views = stats.getFirst().getHits();
             }
-            return eventMapper.toShortDto(ev, views, request);
+            return eventMapper.toEventShortDto(ev);
         }).toList();
         return list;
     }

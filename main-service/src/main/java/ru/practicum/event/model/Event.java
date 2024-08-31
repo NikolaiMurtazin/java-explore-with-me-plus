@@ -33,10 +33,10 @@ public class Event {
     @ToString.Exclude
     private Category category;
 
-    @Column(name = "confirmed_requests", nullable = false)
+    @Column(name = "confirmed_requests")
     private Integer confirmedRequests = 0;
 
-    @Column(name = "created_on", nullable = false)
+    @Column(name = "created_on")
     private LocalDateTime createdOn;
 
     @Column(name = "description", nullable = false)
@@ -55,17 +55,17 @@ public class Event {
     @ToString.Exclude
     private Location location;
 
-    @Column(name = "paid", nullable = false)
-    private Boolean paid;
+    @Column(name = "paid")
+    private boolean paid;
 
-    @Column(name = "participant_limit", nullable = false)
-    private Integer participantLimit = 0;
+    @Column(name = "participant_limit")
+    private Integer participantLimit;
 
     @Column(name = "published_on")
     private LocalDateTime publishedOn;
 
-    @Column(name = "request_moderation", nullable = false)
-    private Boolean requestModeration;
+    @Column(name = "request_moderation")
+    private boolean requestModeration;
 
     @Enumerated(EnumType.STRING)
     private EventState state;
@@ -73,10 +73,6 @@ public class Event {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "views", nullable = false)
+    @Column(name = "views")
     private Long views = 0L;
-
-    @ManyToMany(mappedBy = "events")
-    @ToString.Exclude
-    private Collection<Compilation> compilations = new HashSet<>();
 }

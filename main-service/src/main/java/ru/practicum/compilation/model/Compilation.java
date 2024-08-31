@@ -21,7 +21,7 @@ public class Compilation {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "pinned", nullable = false)
+    @Column(name = "pinned")
     private Boolean pinned;
 
     @Column(name = "title", nullable = false)

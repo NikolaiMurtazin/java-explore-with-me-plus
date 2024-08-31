@@ -62,7 +62,7 @@ public class RequestServiceImpl implements RequestService {
             throw new ConflictException("Repeatable request not allowed");
         }
         checkEventRequestLimit(event);
-        if (!event.getRequestModeration()) {
+        if (!event.isRequestModeration()) {
             dto.setStatus(RequestStatus.CONFIRMED);
         } else {
             dto.setStatus(RequestStatus.PENDING);
