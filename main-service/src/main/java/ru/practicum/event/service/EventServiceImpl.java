@@ -139,7 +139,7 @@ public class EventServiceImpl implements EventService {
 //    Приватные пользователи
 
     @Override
-    public List<EventShortDto> getAll(PrivateEventParams params) { // готов
+    public List<EventShortDto> getAll(PrivateEventParams params) { // готово
         QEvent event = QEvent.event;
         List<BooleanExpression> conditions = new ArrayList<>();
         conditions.add(event.initiator.id.eq(params.getUserId()));
@@ -161,31 +161,51 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventFullDto create(long userId, NewEventDto eventDto) { // готово
+    public EventFullDto create(long userId, NewEventDto newEventDto) { // готово
         User initiator = getUser(userId);
-        if (eventDto.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
+        if (newEventDto.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
             throw new ConflictException("Different with now less than 2 hours");
         }
-        Category category = categoryRepository.findById(eventDto.getCategory())
-                .orElseThrow(() -> new NotFoundException("Category with id= " + eventDto.getCategory() + " was not found"));
-        Location location = locationRepository.save(eventDto.getLocation());
+        Category category = categoryRepository.findById(newEventDto.getCategory())
+                .orElseThrow(() -> new NotFoundException("Category with id= " + newEventDto.getCategory() + " was not found"));
+        Location location = locationRepository.save(newEventDto.getLocation());
 
-        Event event = eventMapper.toEvent(eventDto, category, location, initiator, EventState.PENDING, LocalDateTime.now());
-        Event saved = eventRepository.save(event);
+        Event event = eventMapper.toEvent(newEventDto, category, location, initiator, EventAction.SEND_TO_REVIEW,
+                LocalDateTime.now());
 
-        return eventMapper.toEventFullDto(saved);
+        return eventMapper.toEventFullDto(eventRepository.save(event));
     }
-//
+
     @Override
-    public EventFullDto getById(long userId, long eventId) {
-        return null;
+    public EventFullDto getById(long userId, long eventId) { // готово
+        getUser(userId);
+        Event event = getEvent(eventId);
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new ConflictException("The user is not the initiator of the event");
+        }
+        return eventMapper.toEventFullDto(event);
     }
 
     @Override
     @Transactional
-    public EventFullDto update(long userId, long eventId, UpdateEventUserRequest event) {
-        return null;
+    public EventFullDto update(long userId, long eventId, UpdateEventUserRequest updateEventUserRequest) { // вроде
+        // готово
+        Event event = getEvent(eventId);
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new ConflictException("The user is not the initiator of the event");
+        }
+        if (event.getState().equals(EventState.PUBLISH_EVENT)) {
+            throw new ConflictException("You can't change an event that has already been published");
+        }
+        if (event.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
+            throw new ConflictException("Different with now less than 2 hours");
+        }
+
+        eventMapper.updateEventFromDto(updateEventUserRequest, event);
+        return eventMapper.toEventFullDto(eventRepository.save(event));
     }
+
+//
 
     @Override
     public EventFullDto update(long eventId, UpdateEventAdminRequest event) {
