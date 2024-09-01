@@ -19,11 +19,6 @@ import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.dto.PrivateEventParams;
 import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.service.EventService;
-import ru.practicum.request.dto.EventRequestStatusUpdateRequest;
-import ru.practicum.request.dto.EventRequestStatusUpdateResult;
-import ru.practicum.request.dto.ParticipationRequestDto;
-import ru.practicum.request.dto.RequestParamsUpdate;
-import ru.practicum.request.service.RequestService;
 
 import java.util.List;
 
@@ -33,7 +28,6 @@ import java.util.List;
 @RequestMapping("/users/{userId}/events")
 public class PrivateEventsController {
     private final EventService eventService;
-    private final RequestService requestService;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -47,8 +41,8 @@ public class PrivateEventsController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto create(@PathVariable("userId") long userId,
-                               @Valid @RequestBody NewEventDto newEventDto) {
-        return eventService.create(userId, newEventDto);
+                               @Valid @RequestBody NewEventDto event) {
+        return eventService.create(userId, event);
     }
 
     @GetMapping("/{eventId}")
@@ -64,22 +58,5 @@ public class PrivateEventsController {
                                @PathVariable("eventId") long eventId,
                                @Valid @RequestBody UpdateEventUserRequest updateEventUserRequest) {
         return eventService.update(userId, eventId, updateEventUserRequest);
-    }
-
-    @GetMapping("/{eventId}/requests")
-    @ResponseStatus(HttpStatus.OK)
-    public List<ParticipationRequestDto> getRequestsOnUserEvent(@PathVariable("userId") long userId,
-                                                                @PathVariable("eventId") long eventId) {
-
-        return requestService.findRequestsOnUserEvent(userId, eventId);
-    }
-
-    @PatchMapping("/{eventId}/requests")
-    @ResponseStatus(HttpStatus.OK)
-    public EventRequestStatusUpdateResult updateStatusRequestByUserAndEventId(@PathVariable("userId") long userId,
-                                                                              @PathVariable("eventId") long eventId,
-                                                                              @RequestBody EventRequestStatusUpdateRequest updateDto) {
-
-        return requestService.updateStatus(new RequestParamsUpdate(userId, eventId, updateDto));
     }
 }

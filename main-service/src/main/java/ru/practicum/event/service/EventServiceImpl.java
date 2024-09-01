@@ -139,7 +139,7 @@ public class EventServiceImpl implements EventService {
 //    Приватные пользователи
 
     @Override
-    public List<EventShortDto> getAll(PrivateEventParams params) { // готово
+    public List<EventShortDto> getAll(PrivateEventParams params) { // todo работает
         QEvent event = QEvent.event;
         List<BooleanExpression> conditions = new ArrayList<>();
         conditions.add(event.initiator.id.eq(params.getUserId()));
@@ -161,7 +161,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventFullDto create(long userId, NewEventDto newEventDto) { // готово
+    public EventFullDto create(long userId, NewEventDto newEventDto) { // todo работает
         User initiator = getUser(userId);
         if (newEventDto.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
             throw new ConflictException("Different with now less than 2 hours");
@@ -175,9 +175,8 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
 
-    //
     @Override
-    public EventFullDto getById(long userId, long eventId) { // готово
+    public EventFullDto getById(long userId, long eventId) {  // todo выдает ошибку 500
         getUser(userId);
         Event event = getEvent(eventId);
         if (!event.getInitiator().getId().equals(userId)) {
@@ -188,8 +187,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional
-    public EventFullDto update(long userId, long eventId, UpdateEventUserRequest updateEventUserRequest) { // вроде
-        // готово
+    public EventFullDto update(long userId, long eventId, UpdateEventUserRequest updateEventUserRequest) {
+        // todo выдает ошибку 500
         Event event = getEvent(eventId);
         if (!event.getInitiator().getId().equals(userId)) {
             throw new ConflictException("The user is not the initiator of the event");
@@ -201,7 +200,42 @@ public class EventServiceImpl implements EventService {
             throw new ConflictException("Different with now less than 2 hours");
         }
 
-        eventMapper.updateEventFromDto(updateEventUserRequest, event);
+        if (updateEventUserRequest.getAnnotation() != null) {
+            event.setAnnotation(updateEventUserRequest.getAnnotation());
+        }
+        if (updateEventUserRequest.getCategory() != null) {
+            Category category = getCategory(updateEventUserRequest.getCategory());
+            event.setCategory(category);
+        }
+        if (updateEventUserRequest.getDescription() != null) {
+            event.setDescription(updateEventUserRequest.getDescription());
+        }
+        if (updateEventUserRequest.getEventDate() != null) {
+            event.setEventDate(updateEventUserRequest.getEventDate());
+        }
+        if (updateEventUserRequest.getLocation() != null) {
+            Location location = locationRepository.save(updateEventUserRequest.getLocation());
+            event.setLocation(location);
+        }
+        if (updateEventUserRequest.getPaid() != null) {
+            event.setPaid(updateEventUserRequest.getPaid());
+        }
+        if (updateEventUserRequest.getParticipantLimit() != null) {
+            event.setParticipantLimit(updateEventUserRequest.getParticipantLimit());
+        }
+        if (updateEventUserRequest.getRequestModeration() != null) {
+            event.setRequestModeration(updateEventUserRequest.getRequestModeration());
+        }
+        if (updateEventUserRequest.getTitle() != null) {
+            event.setTitle(updateEventUserRequest.getTitle());
+        }
+        if (updateEventUserRequest.getStateAction() != null) {
+            if (updateEventUserRequest.getStateAction().equals(EventAction.SEND_TO_REVIEW)) {
+                event.setState(EventState.PENDING);
+            } else if (updateEventUserRequest.getStateAction().equals(EventAction.CANCEL_REVIEW)) {
+                event.setState(EventState.CANCELED);
+            }
+        }
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
 
@@ -279,8 +313,7 @@ public class EventServiceImpl implements EventService {
     }
 
     private Category getCategory(long categoryId) {
-        Category category = categoryRepository.findById(categoryId)
+        return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new NotFoundException("Category with id= " + categoryId + " was not found"));
-        return category;
     }
 }
