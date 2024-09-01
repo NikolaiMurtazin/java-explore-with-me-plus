@@ -21,9 +21,6 @@ public class Request {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "description")
-    private String description;
-
     @Column(name = "created")
     private LocalDateTime created;
 
