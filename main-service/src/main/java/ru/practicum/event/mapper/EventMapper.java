@@ -1,17 +1,13 @@
 package ru.practicum.event.mapper;
 
-import org.mapstruct.InjectionStrategy;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingConstants;
-import org.mapstruct.MappingTarget;
+import org.mapstruct.*;
 import ru.practicum.category.model.Category;
-import ru.practicum.event.dto.EventAction;
 import ru.practicum.event.dto.EventFullDto;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.NewEventDto;
 import ru.practicum.event.dto.UpdateEventUserRequest;
 import ru.practicum.event.model.Event;
+import ru.practicum.event.model.EventState;
 import ru.practicum.location.model.Location;
 import ru.practicum.user.model.User;
 
@@ -32,7 +28,7 @@ public interface EventMapper {
     @Mapping(target = "state", source = "state")
     @Mapping(target = "createdOn", source = "createdOn")
     Event toEvent(final NewEventDto newEventDto, final Category category, final Location location,
-                  final User initiator, final EventAction state, LocalDateTime createdOn);
+                  final User initiator, final EventState state, LocalDateTime createdOn);
 
     EventShortDto toEventShortDto(final Event event);
 

@@ -102,9 +102,6 @@ public class EventServiceImpl implements EventService {
             return eventMapper.toEventShortDto(finalEvent);
         }).toList();
 
-//        EndpointHitDTO hitDTO = new EndpointHitDTO()
-//        statClient.saveStats(hitDTO);
-//TODO
         return returnList;
     }
 
@@ -117,18 +114,21 @@ public class EventServiceImpl implements EventService {
 
         Long requests = requestRepository.countConfirmedRequest(eventId);
 
+        long eventViews = getEventViews(event);
+
+        return eventMapper.toEventFullDto(event);
+    }
+
+    private long getEventViews(Event event) {
         List<String> listEndpoint = List.of("/event/" + event.getId());
         StatsParams statsParams = StatsParams.builder()
                 .uris(listEndpoint)
                 .unique(false)
                 .start(LocalDateTime.MIN)
                 .end(LocalDateTime.now())
-                .end(LocalDateTime.now()).build();
+                .build();
         List<ViewStatsDTO> stats = statClient.getStats(statsParams);
-        long views = stats.getFirst().getHits();
-
-        // statClient.saveStats();//TODO
-        return eventMapper.toEventFullDto(event);
+        return stats.getFirst().getHits();
     }
 
     @Override
@@ -166,16 +166,16 @@ public class EventServiceImpl implements EventService {
         if (newEventDto.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
             throw new ConflictException("Different with now less than 2 hours");
         }
-        Category category = categoryRepository.findById(newEventDto.getCategory())
-                .orElseThrow(() -> new NotFoundException("Category with id= " + newEventDto.getCategory() + " was not found"));
+        Category category = getCategory(newEventDto.getCategory());
         Location location = locationRepository.save(newEventDto.getLocation());
 
-        Event event = eventMapper.toEvent(newEventDto, category, location, initiator, EventAction.SEND_TO_REVIEW,
+        Event event = eventMapper.toEvent(newEventDto, category, location, initiator, EventState.PENDING,
                 LocalDateTime.now());
 
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
 
+    //
     @Override
     public EventFullDto getById(long userId, long eventId) { // готово
         getUser(userId);
@@ -194,7 +194,7 @@ public class EventServiceImpl implements EventService {
         if (!event.getInitiator().getId().equals(userId)) {
             throw new ConflictException("The user is not the initiator of the event");
         }
-        if (event.getState().equals(EventState.PUBLISH_EVENT)) {
+        if (event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("You can't change an event that has already been published");
         }
         if (event.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
@@ -205,11 +205,63 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventFullDto(eventRepository.save(event));
     }
 
-//
-
     @Override
-    public EventFullDto update(long eventId, UpdateEventAdminRequest event) {
-        return null;
+    @Transactional
+    public EventFullDto update(long eventId, UpdateEventAdminRequest eventDto) {
+        Event savedEvent = getEvent(eventId);
+
+        if (savedEvent.getState().equals(EventState.PUBLISHED) && savedEvent.getPublishedOn().plusHours(1).isAfter(eventDto.getEventDate())) {
+            throw new ConflictException("Different with publishedOn less than 1 hours");
+        }
+        if (eventDto.getStateAction().equals(EventAction.PUBLISH_EVENT) && !savedEvent.getState().equals(EventState.PENDING)) {
+            throw new ConflictException("Event in state " + savedEvent.getState() + " can not be published");
+        }
+        if (eventDto.getStateAction().equals(EventAction.REJECT_EVENT) && savedEvent.getState().equals(EventState.PUBLISHED)) {
+            throw new ConflictException("Event in state " + savedEvent.getState() + " can not be rejected");
+        }
+        if (eventDto.getStateAction().equals(EventAction.REJECT_EVENT)) {
+            savedEvent.setState(EventState.CANCELED);
+        }
+
+
+        if (eventDto.getAnnotation() != null) {
+            savedEvent.setAnnotation(eventDto.getAnnotation());
+        }
+        if (eventDto.getDescription() != null) {
+            savedEvent.setDescription(eventDto.getDescription());
+        }
+        if (eventDto.getLocation() != null) {
+            savedEvent.setLocation(locationRepository.save(eventDto.getLocation()));
+        }
+        if (eventDto.getEventDate() != null) {
+            savedEvent.setEventDate(eventDto.getEventDate());
+        }
+        if (eventDto.getCategory() != null) {
+            Category category = getCategory(eventDto.getCategory());
+            savedEvent.setCategory(category);
+        }
+        if (eventDto.getPaid() != null) {
+            savedEvent.setPaid(eventDto.getPaid());
+        }
+        if (eventDto.getParticipantLimit() != null) {
+            savedEvent.setParticipantLimit(eventDto.getParticipantLimit());
+        }
+        if (eventDto.getRequestModeration() != null) {
+            savedEvent.setRequestModeration(eventDto.getRequestModeration());
+        }
+        if (eventDto.getTitle() != null) {
+            savedEvent.setTitle(eventDto.getTitle());
+        }
+        if (eventDto.getStateAction().equals(EventAction.PUBLISH_EVENT)) {
+            savedEvent.setState(EventState.PUBLISHED);
+        }
+        savedEvent.setPublishedOn(LocalDateTime.now());
+
+    //    Long requests = requestRepository.countConfirmedRequest(eventId);//TODO
+//        long eventViews = getEventViews(savedEvent);//TODO
+
+        return eventMapper.toEventFullDto(eventRepository.save(savedEvent));
+
     }
 
     @Override
@@ -224,5 +276,11 @@ public class EventServiceImpl implements EventService {
 
     private User getUser(long userId) {
         return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found with id" + userId));
+    }
+
+    private Category getCategory(long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new NotFoundException("Category with id= " + categoryId + " was not found"));
+        return category;
     }
 }

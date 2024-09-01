@@ -5,13 +5,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum EventAction {
-    SEND_TO_REVIEW("PENDING"), // отправляется при публикации юзером
 
-    CANCEL_REVIEW("CANCELED"), // отменяется юзером
+    SEND_TO_REVIEW("SEND_TO_REVIEW"), // отправляется при юзером
 
-    PUBLISH_EVENT("PUBLISHED"), // публикуется админом
+    CANCEL_REVIEW("CANCEL_REVIEW"), // отменяется юзером
 
-    REJECT_EVENT("CANCELED"); // отменяется админом
+    PUBLISH_EVENT("PUBLISH_EVENT"), // публикуется админом
+
+    REJECT_EVENT("REJECT_EVENT"); // отменяется админом
 
     private final String value;
 
@@ -26,7 +27,7 @@ public enum EventAction {
     }
 
     @JsonCreator
-    public static EventAction fromValue(@JsonProperty("stateAction") String text) {
+    public static EventAction fromValue(String text) {
         for (EventAction b : EventAction.values()) {
             if (String.valueOf(b.value).equals(text)) {
                 return b;
