@@ -14,11 +14,9 @@ public interface RequestService {
 
     ParticipationRequestDto cancel(long userId, long requestId);
 
-    List<ParticipationRequestDto> findUserRequests(long userId);
+    List<ParticipationRequestDto> findRequestsOnUserEvent(long userId, long eventId);
 
     EventRequestStatusUpdateResult updateStatus(RequestParamsUpdate params);
 
-
-    List<ParticipationRequestDto> findRequestsOnUserEvent(long userId, long eventId);
 
 }

@@ -10,7 +10,6 @@ import ru.practicum.exeption.ConflictException;
 import ru.practicum.exeption.NotFoundException;
 import ru.practicum.request.dto.EventRequestStatusUpdateResult;
 import ru.practicum.request.dto.ParticipationRequestDto;
-import ru.practicum.request.dto.RequestParamsCreate;
 import ru.practicum.request.dto.RequestParamsUpdate;
 import ru.practicum.request.mapper.RequestMapper;
 import ru.practicum.request.model.Request;
@@ -21,6 +20,7 @@ import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,8 +36,17 @@ public class RequestServiceImpl implements RequestService {
     private final EventRepository eventRepository;
 
     @Override
+    public List<ParticipationRequestDto> getAll(long userId) { // todo не проверял
+        User user = getUser(userId);
+        List<Request> requests = requestRepository.findByRequester(user);
+        return requests.stream()
+                .map(requestMapper::toParticipationRequestDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
-    public ParticipationRequestDto create(long userId, long evenId) { // готово, но не проверял
+    public ParticipationRequestDto create(long userId, long evenId) { // todo выдает ошибку 500
         User requester = getUser(userId);
         Event event = getEvent(evenId);
 
@@ -70,35 +79,9 @@ public class RequestServiceImpl implements RequestService {
         return requestMapper.toParticipationRequestDto(requestRepository.save(request));
     }
 
-    @Override
-    public List<ParticipationRequestDto> findUserRequests(long userId) {
-        User user = getUser(userId);
-        List<Request> allRequests = requestRepository.findByRequester(user);
-
-        if (allRequests.isEmpty()) {
-            return List.of();
-        }
-        return allRequests.stream().map(requestMapper::toParticipationRequestDto).toList();
-    }
-
-
-    private void checkEventRequestLimit(Event event) {
-        if (requestRepository.isParticipantLimitReached(event.getId(), event.getParticipantLimit())) {
-            throw new ConflictException("Request limit reached");
-        }
-    }
-
-    @Override
-    public EventRequestStatusUpdateResult updateStatus(RequestParamsUpdate params) {
-        User user = getUser(params.getUserId());
-        Event event = getUserEvent(params.getEventId(), user);
-        checkEventRequestLimit(event);
-        return null;
-    }
-
     @Transactional
     @Override
-    public ParticipationRequestDto cancel(long userId, long requestId) {
+    public ParticipationRequestDto cancel(long userId, long requestId) { // todo вроде выглядит норм, но не проверял
         getUser(userId);
         Request request = getRequest(requestId);
         request.setStatus(RequestStatus.REJECTED);
@@ -119,8 +102,17 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    public List<ParticipationRequestDto> getAll(long userId) {
-        return List.of();
+    public EventRequestStatusUpdateResult updateStatus(RequestParamsUpdate params) {
+        User user = getUser(params.getUserId());
+        Event event = getUserEvent(params.getEventId(), user);
+        checkEventRequestLimit(event);
+        return null;
+    }
+
+    private void checkEventRequestLimit(Event event) {
+        if (requestRepository.isParticipantLimitReached(event.getId(), event.getParticipantLimit())) {
+            throw new ConflictException("Request limit reached");
+        }
     }
 
 

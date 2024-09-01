@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.category.dto.CategoryDto;
 import ru.practicum.location.model.Location;
 
 import java.time.LocalDateTime;
