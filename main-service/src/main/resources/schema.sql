@@ -55,9 +55,8 @@ CREATE TABLE IF NOT EXISTS requests
     event_id     BIGINT                                  NOT NULL,
     requester_id BIGINT                                  NOT NULL,
     status       CHARACTER VARYING(100)                  NOT NULL,
-    CONSTRAINT requests_events
-        FOREIGN KEY (event_id) REFERENCES events (event_id)
-            ON DELETE CASCADE
+    CONSTRAINT requests_events FOREIGN KEY (event_id) REFERENCES events (event_id) ON DELETE CASCADE,
+    CONSTRAINT unique_requester_event UNIQUE (request_id, event_id)
 );
 
 CREATE TABLE IF NOT EXISTS compilations

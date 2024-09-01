@@ -19,6 +19,7 @@ import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -31,7 +32,43 @@ public class RequestServiceImpl implements RequestService {
     private final RequestMapper requestMapper;
 
     private final UserRepository userRepository;
+
     private final EventRepository eventRepository;
+
+    @Override
+    @Transactional
+    public ParticipationRequestDto create(long userId, long evenId) { // готово, но не проверял
+        User requester = getUser(userId);
+        Event event = getEvent(evenId);
+
+        if (event.getInitiator().getId().equals(userId)) {
+            throw new ConflictException("The initiator of the event can't add a request to participate in his event");
+        }
+
+        if (!event.getState().equals(EventState.PUBLISH_EVENT)) {
+            throw new ConflictException("Event not published");
+        }
+
+        if (event.getParticipantLimit() == 0 || event.getParticipantLimit() > event.getConfirmedRequests()) {
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
+        } else {
+            throw new ConflictException("The event has reached the limit of participation requests");
+        }
+
+        Request request = new Request();
+        request.setRequester(requester);
+        request.setEvent(event);
+        request.setCreated(LocalDateTime.now());
+
+        if (event.isRequestModeration()) {
+            request.setStatus(RequestStatus.PENDING);
+        } else {
+            request.setStatus(RequestStatus.CONFIRMED);
+        }
+
+        eventRepository.save(event);
+        return requestMapper.toParticipationRequestDto(requestRepository.save(request));
+    }
 
     @Override
     public List<ParticipationRequestDto> findUserRequests(long userId) {
@@ -41,37 +78,9 @@ public class RequestServiceImpl implements RequestService {
         if (allRequests.isEmpty()) {
             return List.of();
         }
-        return allRequests.stream().map(requestMapper::toDto).toList();
+        return allRequests.stream().map(requestMapper::toParticipationRequestDto).toList();
     }
 
-
-    @Transactional
-    @Override
-    public ParticipationRequestDto save(RequestParamsCreate params) {
-        User requester = getUser(params.getUserId());
-        Event event = getEvent(params.getEventId());
-        ParticipationRequestDto dto = params.getDto();
-        if (!event.getState().equals(EventState.PUBLISHED)) {
-            throw new ConflictException("Event not published");
-        }
-        if (event.getInitiator().equals(dto.getRequester())) {
-            throw new ConflictException("Requester couldn't be initiator");
-        }
-        List<RequestStatus> states = List.of(RequestStatus.PENDING, RequestStatus.CONFIRMED);
-        if (!requestRepository.findByEventAndRequesterAndStatusIn(event, requester, states).isEmpty()) {
-            throw new ConflictException("Repeatable request not allowed");
-        }
-        checkEventRequestLimit(event);
-        if (!event.isRequestModeration()) {
-            dto.setStatus(RequestStatus.CONFIRMED);
-        } else {
-            dto.setStatus(RequestStatus.PENDING);
-        }
-
-        Request saved = requestRepository.save(requestMapper.toEntity(dto));
-
-        return requestMapper.toDto(saved);
-    }
 
     private void checkEventRequestLimit(Event event) {
         if (requestRepository.isParticipantLimitReached(event.getId(), event.getParticipantLimit())) {
@@ -94,7 +103,7 @@ public class RequestServiceImpl implements RequestService {
         Request request = getRequest(requestId);
         request.setStatus(RequestStatus.REJECTED);
         Request saved = requestRepository.save(request);
-        return requestMapper.toDto(saved);
+        return requestMapper.toParticipationRequestDto(saved);
     }
 
     @Override
@@ -106,7 +115,12 @@ public class RequestServiceImpl implements RequestService {
         if (allRequests.isEmpty()) {
             return List.of();
         }
-        return allRequests.stream().map(requestMapper::toDto).toList();
+        return allRequests.stream().map(requestMapper::toParticipationRequestDto).toList();
+    }
+
+    @Override
+    public List<ParticipationRequestDto> getAll(long userId) {
+        return List.of();
     }
 
 
