@@ -5,7 +5,6 @@ import lombok.*;
 import ru.practicum.event.model.Event;
 
 import java.util.Collection;
-import java.util.HashSet;
 
 @Entity
 @Table(name = "compilations")
