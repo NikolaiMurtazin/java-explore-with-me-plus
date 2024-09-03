@@ -5,7 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.category.mapper.CategoryMapper;
 import ru.practicum.client.StatClient;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
@@ -24,8 +23,6 @@ import ru.practicum.request.dto.EventCountByRequest;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.stat.StatsParams;
 import ru.practicum.stat.ViewStatsDTO;
-import ru.practicum.user.mapper.UserMapper;
-import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,11 +36,8 @@ import java.util.stream.StreamSupport;
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
     private final EventService eventService;
-    private final UserRepository userRepository;
     private final RequestRepository requestRepository;
     private final StatClient statClient;
-    private final UserMapper userMapper;
-    private final CategoryMapper categoryMapper;
     private final EventMapper eventMapper;
 
 
@@ -57,7 +51,6 @@ public class CompilationServiceImpl implements CompilationService {
             events = eventService.getByIds(newCompilationDto.getEvents());
         }
         Compilation compilation = compilationMapper.toCompilation(newCompilationDto, events);
-        //TODO достать views User requests и положить в маппер
         Compilation saved = compilationRepository.save(compilation);
         List<EventShortDto> list = getEventShortDtos(saved);
         return compilationMapper.toCompilationDto(saved, list);
@@ -66,47 +59,29 @@ public class CompilationServiceImpl implements CompilationService {
     private List<EventShortDto> getEventShortDtos(Compilation saved) {
         List<Event> compEvents = (List<Event>) saved.getEvents();
 
-        List<EventCountByRequest> eventsIdWithViews =
-                requestRepository.findConfirmedRequestWithoutLimitCheck(compEvents);
+        List<EventCountByRequest> eventsIdWithViews = requestRepository.findConfirmedRequestWithoutLimitCheck(compEvents);
 
 
-        List<String> uris = eventsIdWithViews.stream()
-                .map(ev -> "/events/" + ev.getEventId())
-                .toList();
+        List<String> uris = eventsIdWithViews.stream().map(ev -> "/events/" + ev.getEventId()).toList();
 
-        StatsParams statsParams = StatsParams.builder()
-                .uris(uris)
-                .unique(true)
-                .start(LocalDateTime.now().minusYears(100))
-                .end(LocalDateTime.now())
-                .build();
+        StatsParams statsParams = StatsParams.builder().uris(uris).unique(true).start(LocalDateTime.now().minusYears(100)).end(LocalDateTime.now()).build();
 
         List<ViewStatsDTO> viewStatsDTOS = statClient.getStats(statsParams);
 
-        return eventsIdWithViews.stream()
-                .map(ev -> {
-                    Event finalEvent = compEvents.stream()
-                            .filter(e -> e.getId().equals(ev.getEventId()))
-                            .findFirst()
-                            .orElseThrow(() -> new IllegalStateException("Event not found: " + ev.getEventId()));
+        return eventsIdWithViews.stream().map(ev -> {
+            Event finalEvent = compEvents.stream().filter(e -> e.getId().equals(ev.getEventId())).findFirst().orElseThrow(() -> new IllegalStateException("Event not found: " + ev.getEventId()));
 
-                    long views = viewStatsDTOS.stream()
-                            .filter(stat -> stat.getUri().equals("/events/" + ev.getEventId()))
-                            .map(ViewStatsDTO::getHits)
-                            .findFirst()
-                            .orElse(0L);
-                    finalEvent.setConfirmedRequests(Math.toIntExact(ev.getCount()));
-                    finalEvent.setViews(views);
-                    return eventMapper.toEventShortDto(finalEvent);
-                })
-                .toList();
+            long views = viewStatsDTOS.stream().filter(stat -> stat.getUri().equals("/events/" + ev.getEventId())).map(ViewStatsDTO::getHits).findFirst().orElse(0L);
+            finalEvent.setConfirmedRequests(Math.toIntExact(ev.getCount()));
+            finalEvent.setViews(views);
+            return eventMapper.toEventShortDto(finalEvent);
+        }).toList();
     }
 
     @Override
     @Transactional
     public void delete(long compId) {
-        Compilation compilation = compilationRepository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("Compilation with id= " + compId + " was not found"));
+        Compilation compilation = compilationRepository.findById(compId).orElseThrow(() -> new NotFoundException("Compilation with id= " + compId + " was not found"));
 
         compilationRepository.delete(compilation);
         compilationRepository.flush();
@@ -115,8 +90,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     @Transactional
     public CompilationDto update(long compId, UpdateCompilationRequest updateCompilationRequest) {
-        Compilation compilation = compilationRepository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("Compilation with id= " + compId + " was not found"));
+        Compilation compilation = compilationRepository.findById(compId).orElseThrow(() -> new NotFoundException("Compilation with id= " + compId + " was not found"));
         if (updateCompilationRequest.getEvents() != null) {
             compilation.setEvents(eventService.getByIds(updateCompilationRequest.getEvents()));
         }
@@ -142,26 +116,21 @@ public class CompilationServiceImpl implements CompilationService {
             conditions.add(compilation.pinned.eq(params.getPinned()));
         }
 
-        BooleanExpression finalCondition = conditions.stream()
-                .reduce(BooleanExpression::and)
-                .orElse(compilation.isNotNull());
+        BooleanExpression finalCondition = conditions.stream().reduce(BooleanExpression::and).orElse(compilation.isNotNull());
 
         PageRequest pageRequest = PageRequest.of(params.getFrom() / params.getSize(), params.getSize());
 
         assert finalCondition != null;
         Iterable<Compilation> compilationsIterable = compilationRepository.findAll(finalCondition, pageRequest);
 
-        List<Compilation> compilations = StreamSupport.stream(compilationsIterable.spliterator(), false)
-                .toList();
+        List<Compilation> compilations = StreamSupport.stream(compilationsIterable.spliterator(), false).toList();
 
-        return compilations.stream().map(comp ->
-                compilationMapper.toCompilationDto(comp, getEventShortDtos(comp))).toList();
+        return compilations.stream().map(comp -> compilationMapper.toCompilationDto(comp, getEventShortDtos(comp))).toList();
     }
 
     @Override
     public CompilationDto getById(long compId) {
-        Compilation compilation = compilationRepository.findById(compId)
-                .orElseThrow(() -> new NotFoundException("Compilation with id= " + compId + " was not found"));
+        Compilation compilation = compilationRepository.findById(compId).orElseThrow(() -> new NotFoundException("Compilation with id= " + compId + " was not found"));
 
         return compilationMapper.toCompilationDto(compilation, getEventShortDtos(compilation));
     }
