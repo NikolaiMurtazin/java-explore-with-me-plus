@@ -169,7 +169,6 @@ public class EventServiceImpl implements EventService {
 
         List<Event> events = eventRepository.findAll(finalConditional, pageRequest).getContent();
         List<Long> listEventIds = events.stream().map(Event::getId).toList();
-        List<String> listEndpoint = new ArrayList<>();
 
         List<EventCountByRequest> eventsIdWithViews
                 = requestRepository.findConfirmedRequestWithoutLimitCheck(listEventIds);
