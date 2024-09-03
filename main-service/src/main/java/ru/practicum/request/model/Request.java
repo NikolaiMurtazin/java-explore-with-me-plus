@@ -18,10 +18,12 @@ import java.time.LocalDateTime;
 @Table(name = "requests")
 public class Request {
     @Id
+    @Column(name = "request_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "created")
+
     private LocalDateTime created;
 
     @ManyToOne(fetch = FetchType.LAZY)

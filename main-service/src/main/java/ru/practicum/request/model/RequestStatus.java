@@ -1,13 +1,12 @@
 package ru.practicum.request.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 public enum RequestStatus {
     PENDING("PENDING"),
-
     REJECTED("REJECTED"),
+    CANCELED("CANCELED"),
 
     CONFIRMED("CONFIRMED");
 
@@ -24,7 +23,7 @@ public enum RequestStatus {
     }
 
     @JsonCreator
-    public static RequestStatus fromValue(@JsonProperty("state") String text) {
+    public static RequestStatus fromValue(String text) {
         for (RequestStatus b : RequestStatus.values()) {
             if (String.valueOf(b.value).equals(text)) {
                 return b;

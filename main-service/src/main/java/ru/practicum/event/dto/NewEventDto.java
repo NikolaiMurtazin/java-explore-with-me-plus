@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.practicum.exeption.ValidEventDate;
 import ru.practicum.location.model.Location;
 
 import java.time.LocalDateTime;
@@ -31,6 +32,7 @@ public class NewEventDto {
 
     @NotNull(message = "EventDate can't be blank")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    @ValidEventDate
     private LocalDateTime eventDate;
 
     @NotNull(message = "Location can't be blank")

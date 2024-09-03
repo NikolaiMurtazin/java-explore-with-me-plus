@@ -31,14 +31,16 @@ public class AdminEventsController {
                                         @RequestParam(value = "states", required = false) List<EventState> states,
                                         @RequestParam(value = "categories", required = false) List<Long> categories,
                                         @RequestParam(value = "rangeStart", required = false)
-                                        @DateTimeFormat(pattern = ("dd-MM-yyyy HH:mm:ss")) LocalDateTime rangeStart,
+                                        @DateTimeFormat(pattern = ("yyyy-MM-dd HH:mm:ss")) LocalDateTime rangeStart,
                                         @RequestParam(value = "rangeEnd", required = false)
-                                        @DateTimeFormat(pattern = ("dd-MM-yyyy HH:mm:ss")) LocalDateTime rangeEnd,
+                                        @DateTimeFormat(pattern = ("yyyy-MM-dd HH:mm:ss")) LocalDateTime rangeEnd,
                                         @RequestParam(value = "from", defaultValue = "0") int from,
                                         @RequestParam(value = "size", defaultValue = "10") int size) {
 
         Map<String, LocalDateTime> ranges = validDate(rangeStart, rangeEnd);
         AdminEventRequestParams params = AdminEventRequestParams.builder()
+                .users(users)
+                .states(states)
                 .categories(categories)
                 .rangeStart(ranges.get("rangeStart"))
                 .rangeEnd(ranges.get("rangeEnd"))
@@ -50,20 +52,19 @@ public class AdminEventsController {
 
     @PatchMapping("/events/{eventId}")
     @ResponseStatus(HttpStatus.OK)
-    public EventFullDto updateEvent(@Valid @PathVariable long eventId, @RequestBody UpdateEventAdminRequest dto) {
+    public EventFullDto updateEvent(@Valid @PathVariable long eventId,
+                                    @Valid @RequestBody UpdateEventAdminRequest dto) {
+
         return eventService.update(eventId, dto);
     }
 
     private Map<String, LocalDateTime> validDate(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
-        if (rangeEnd.isBefore(rangeStart)) {
+        if (rangeEnd != null && rangeStart != null && rangeEnd.isBefore(rangeStart)) {
             throw new WrongDateException("Range end must be after range start");
         }
-        if (rangeStart == null) {
-            return Map.of("rangeStart", LocalDateTime.now(),
-                    "rangeEnd", rangeEnd);
-        } else {
-            return Map.of("rangeStart", rangeStart,
-                    "rangeEnd", rangeEnd);
-        }
+        LocalDateTime effectiveRangeStart = rangeStart != null ? rangeStart : LocalDateTime.now();
+        LocalDateTime effectiveRangeEnd = rangeEnd != null ? rangeEnd : effectiveRangeStart.plusYears(200);
+
+        return Map.of("rangeStart", effectiveRangeStart, "rangeEnd", effectiveRangeEnd);
     }
 }

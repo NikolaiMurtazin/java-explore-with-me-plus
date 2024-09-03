@@ -3,12 +3,11 @@ package ru.practicum.controller;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.stat.StatsParams;
 import ru.practicum.client.StatClient;
 import ru.practicum.stat.EndpointHitDTO;
+import ru.practicum.stat.StatsParams;
 import ru.practicum.stat.ViewStatsDTO;
 
 import java.time.LocalDateTime;
@@ -22,8 +21,8 @@ public class StatsController {
     private final StatClient statClient;
 
     @PostMapping("/hit")
-    public ResponseEntity<Object> saveStats(@Valid @RequestBody EndpointHitDTO hitDto) {
-        return statClient.saveStats(hitDto);
+    public void saveStats(@Valid @RequestBody EndpointHitDTO hitDto) {
+        statClient.saveStats(hitDto);
     }
 
     @GetMapping("/stats")

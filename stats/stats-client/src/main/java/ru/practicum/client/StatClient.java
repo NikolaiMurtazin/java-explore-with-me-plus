@@ -4,19 +4,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.stat.EndpointHitDTO;
 import ru.practicum.stat.StatsParams;
 import ru.practicum.stat.ViewStatsDTO;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 @Component
 public class StatClient {
@@ -29,35 +27,41 @@ public class StatClient {
                 .build();
     }
 
-    public ResponseEntity<Object> saveStats(EndpointHitDTO dto) { //TODO void, обернуть в try catch
-        return restClient.post()
-                .uri("/hit")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(dto)
-                .retrieve()
-                .body(new ParameterizedTypeReference<>() {
-                });
+    public void saveStats(EndpointHitDTO dto) {
+        try {
+            restClient.post()
+                    .uri("/hit")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(dto)
+                    .retrieve();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
 
     }
 
-    public List<ViewStatsDTO> getStats(StatsParams params) { //TODO обернуть в try catch
-        Map<String, Object> pathParams = Map.of(
-                "start", encodeDate(params.getStart()),
-                "end", encodeDate(params.getEnd()),
-                "uris", params.getUris(),
-                "unique", params.getUnique()
-        );
-        return restClient.get()
-                .uri("/stats", pathParams)
-
-                .retrieve()
-                .body(new ParameterizedTypeReference<>() {
-                });
+    public List<ViewStatsDTO> getStats(StatsParams params) {
+        try {
+            String uri = UriComponentsBuilder.fromPath("/stats")
+                    .queryParam("start", encodeDate(params.getStart()))
+                    .queryParam("end", encodeDate(params.getEnd()))
+                    .queryParam("uris", params.getUris())
+                    .queryParam("unique", params.getUnique()).toUriString();
+            return restClient.get()
+                    .uri(uri)
+                    .retrieve()
+                    .body(new ParameterizedTypeReference<>() {
+                    });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
     }
 
     private String encodeDate(LocalDateTime date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         String formatted = date.format(formatter);
-        return URLEncoder.encode(formatted, StandardCharsets.UTF_8);
+        return formatted;
     }
 }
