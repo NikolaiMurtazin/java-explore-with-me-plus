@@ -22,7 +22,6 @@ import ru.practicum.request.dto.EventCountByRequest;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.stat.StatsParams;
 import ru.practicum.stat.ViewStatsDTO;
-import ru.practicum.user.mapper.UserMapper;
 import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
