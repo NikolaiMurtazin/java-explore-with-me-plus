@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class ErrorHandler {
         return new ApiError(
                 HttpStatus.BAD_REQUEST.name(),
                 "Incorrectly made request.",
-                ex.getMessage(),
+                ex.getMessage()+ Arrays.toString(ex.getStackTrace()),
                 LocalDateTime.now()
         );
     }
@@ -30,7 +31,7 @@ public class ErrorHandler {
         return new ApiError(
                 HttpStatus.BAD_REQUEST.name(),
                 "Incorrectly made request.",
-                ex.getMessage(),
+                ex.getMessage()+ Arrays.toString(ex.getStackTrace()),
                 LocalDateTime.now()
         );
     }
@@ -41,7 +42,7 @@ public class ErrorHandler {
         return new ApiError(
                 HttpStatus.CONFLICT.name(),
                 "Conflict occurred.",
-                ex.getMessage(),
+                ex.getMessage()+ Arrays.toString(ex.getStackTrace()),
                 LocalDateTime.now()
         );
     }
@@ -52,7 +53,7 @@ public class ErrorHandler {
         return new ApiError(
                 HttpStatus.NOT_FOUND.name(),
                 "The required object was not found.",
-                ex.getMessage(),
+                ex.getMessage()+ Arrays.toString(ex.getStackTrace()),
                 LocalDateTime.now()
         );
     }
@@ -63,7 +64,7 @@ public class ErrorHandler {
         return new ApiError(
                 HttpStatus.CONFLICT.name(),
                 "Integrity constraint has been violated.",
-                ex.getMessage(),
+                ex.getMessage()+ Arrays.toString(ex.getStackTrace()),
                 LocalDateTime.now()
         );
     }
