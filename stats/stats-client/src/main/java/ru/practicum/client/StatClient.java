@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -24,8 +25,12 @@ public class StatClient {
 
     @Autowired
     public StatClient(@Value("${client.url}") String startUrl) {
+        var factory = new HttpComponentsClientHttpRequestFactory();
+        factory.setConnectTimeout(10000);
+        factory.setConnectionRequestTimeout(10000);
         restClient = RestClient.builder()
                 .baseUrl(startUrl)
+                .requestFactory(factory)
                 .build();
     }
 
@@ -45,12 +50,14 @@ public class StatClient {
 
     public List<ViewStatsDTO> getStats(StatsParams params) {
         try {
+
             String uri = UriComponentsBuilder.fromPath("/stats")
                     .queryParam("start", encodeDate(params.getStart()))
                     .queryParam("end", encodeDate(params.getEnd()))
                     .queryParam("uris", params.getUris())
                     .queryParam("unique", params.getUnique()).toUriString();
             RestClient.ResponseSpec retrieve = restClient.get()
+
                     .uri(uri)
                     .retrieve();
             return retrieve.body(new ParameterizedTypeReference<>() {

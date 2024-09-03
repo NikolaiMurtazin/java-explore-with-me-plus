@@ -3,6 +3,7 @@ package ru.practicum.exeption;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -69,6 +70,18 @@ public class ErrorHandler {
                 LocalDateTime.now()
         );
     }
+
+    @ExceptionHandler({MissingServletRequestParameterException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleWrongDateException(final MissingServletRequestParameterException ex) {
+        return new ApiError(
+                HttpStatus.BAD_REQUEST.name(),
+                "Incorrectly made request.",
+                ex.getMessage() + extracted(ex),
+                LocalDateTime.now()
+        );
+    }
+
 
     @ExceptionHandler // вот с этим я хз. Так как в ApiError нет stackTrace
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
