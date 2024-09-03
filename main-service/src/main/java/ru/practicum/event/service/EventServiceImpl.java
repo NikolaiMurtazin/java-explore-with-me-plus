@@ -28,6 +28,7 @@ import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -42,7 +43,6 @@ public class EventServiceImpl implements EventService {
     private final RequestRepository requestRepository;
     private final StatClient statClient;
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
     private final CategoryRepository categoryRepository;
     private final LocationRepository locationRepository;
 
@@ -73,7 +73,9 @@ public class EventServiceImpl implements EventService {
 
         List<Event> events = eventRepository.findAll(finalConditional, pageRequest).getContent();
         List<Long> listEventIds = events.stream().map(Event::getId).toList();
-
+        if (events.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<EventCountByRequest> eventsIdWithViews;
         if (params.getOnlyAvailable()) {
             eventsIdWithViews = requestRepository.findConfirmedRequestWithLimitCheck(listEventIds);
@@ -168,6 +170,9 @@ public class EventServiceImpl implements EventService {
 
 
         List<Event> events = eventRepository.findAll(finalConditional, pageRequest).getContent();
+        if (events.isEmpty()) {
+            return Collections.emptyList();
+        }
         List<Long> listEventIds = events.stream().map(Event::getId).toList();
 
         List<EventCountByRequest> eventsIdWithViews

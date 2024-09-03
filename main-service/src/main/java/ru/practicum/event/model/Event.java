@@ -31,6 +31,7 @@ public class Event {
     private Category category;
 
     @Column(name = "confirmed_requests")
+    @Transient
     private Integer confirmedRequests = 0;
 
     @Column(name = "created_on")
@@ -71,5 +72,6 @@ public class Event {
     private String title;
 
     @Column(name = "views")
+    @Transient
     private Long views = 0L;
 }

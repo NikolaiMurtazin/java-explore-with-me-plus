@@ -80,10 +80,6 @@ public class PublicEventsController {
     private void sendStats(HttpServletRequest request) {
         String ip = request.getRemoteAddr();
         String uri = request.getRequestURI();
-        Map<String, String[]> parameterMap = request.getParameterMap();
-        for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
-            uri = uri + "?" + entry.getKey() + "=" + String.join("&", entry.getValue());
-        }
         EndpointHitDTO dto = EndpointHitDTO.builder()
                 .app("ewm-main-service")
                 .ip(ip)
