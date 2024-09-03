@@ -61,11 +61,12 @@ public class RequestServiceImpl implements RequestService {
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("Event not published");
         }
-        Integer countConfirmedRequest = requestRepository.countConfirmedRequest(evenId);
-        if (!(event.getParticipantLimit() == 0) && event.getParticipantLimit() < countConfirmedRequest) {
-            throw new ConflictException("The event has reached the limit of participation requests");
+        if (!(event.getParticipantLimit() == 0)) {
+            checkEventRequestLimit(event);
         }
+        Integer countConfirmedRequest = requestRepository.countConfirmedRequest(evenId);
         event.setConfirmedRequests(countConfirmedRequest);
+
         Request request = new Request();
         request.setRequester(requester);
         request.setEvent(event);
@@ -112,7 +113,11 @@ public class RequestServiceImpl implements RequestService {
         if (params.getDto().getStatus().equals(RequestStatus.REJECTED)) {
             for (Long requestId : requestIds) {
                 Request request = getRequest(requestId);
-                request.setStatus(RequestStatus.REJECTED);
+                if (request.getStatus().equals(RequestStatus.PENDING)) {
+                    request.setStatus(RequestStatus.REJECTED);
+                } else {
+                    throw new ConflictException("The request have status " + request.getStatus() + " not been rejected yet");
+                }
                 ParticipationRequestDto participationRequestDto = requestMapper.toParticipationRequestDto(requestRepository.save(request));
                 updatedRequests.add(participationRequestDto);
             }
