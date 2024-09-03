@@ -7,8 +7,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,7 +21,7 @@ public class ErrorHandler {
         return new ApiError(
                 HttpStatus.BAD_REQUEST.name(),
                 "Incorrectly made request.",
-                ex.getMessage()+ Arrays.toString(ex.getStackTrace()),
+                ex.getMessage() + extracted(ex),
                 LocalDateTime.now()
         );
     }
@@ -31,7 +32,7 @@ public class ErrorHandler {
         return new ApiError(
                 HttpStatus.BAD_REQUEST.name(),
                 "Incorrectly made request.",
-                ex.getMessage()+ Arrays.toString(ex.getStackTrace()),
+                ex.getMessage() + extracted(ex),
                 LocalDateTime.now()
         );
     }
@@ -42,7 +43,7 @@ public class ErrorHandler {
         return new ApiError(
                 HttpStatus.CONFLICT.name(),
                 "Conflict occurred.",
-                ex.getMessage()+ Arrays.toString(ex.getStackTrace()),
+                ex.getMessage() + extracted(ex),
                 LocalDateTime.now()
         );
     }
@@ -53,7 +54,7 @@ public class ErrorHandler {
         return new ApiError(
                 HttpStatus.NOT_FOUND.name(),
                 "The required object was not found.",
-                ex.getMessage()+ Arrays.toString(ex.getStackTrace()),
+                ex.getMessage() + extracted(ex),
                 LocalDateTime.now()
         );
     }
@@ -64,28 +65,31 @@ public class ErrorHandler {
         return new ApiError(
                 HttpStatus.CONFLICT.name(),
                 "Integrity constraint has been violated.",
-                ex.getMessage()+ Arrays.toString(ex.getStackTrace()),
+                ex.getMessage() + extracted(ex),
                 LocalDateTime.now()
         );
     }
 
     @ExceptionHandler // вот с этим я хз. Так как в ApiError нет stackTrace
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ApiError handleThrowable(final Throwable ex, HttpStatus status) {
+    public ApiError handleThrowable(final Throwable ex) {
 
-//        StringWriter sw = new StringWriter();
-//        PrintWriter pw = new PrintWriter(sw);
-//        e.printStackTrace(pw);
-//        String stackTrace = sw.toString();
 
         List<String> errors = Collections.singletonList(ex.getMessage());
 
         return new ApiError(
                 HttpStatus.INTERNAL_SERVER_ERROR.name(),
                 "An unexpected error occurred.",
-                ex.getMessage(),
+                ex.getMessage() + extracted(ex),
                 errors,
                 LocalDateTime.now()
         );
+    }
+
+    private static String extracted(Throwable ex) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        ex.printStackTrace(pw);
+        return sw.toString();
     }
 }

@@ -264,7 +264,6 @@ public class EventServiceImpl implements EventService {
     @Override
     @Transactional
     public EventFullDto update(long userId, long eventId, UpdateEventUserRequest updateEventUserRequest) {
-        // todo выдает ошибку 500
         Event event = getEvent(eventId);
         if (!event.getInitiator().getId().equals(userId)) {
             throw new ConflictException("The user is not the initiator of the event");
@@ -367,13 +366,13 @@ public class EventServiceImpl implements EventService {
             savedEvent.setState(EventState.PUBLISHED);
         }
         savedEvent.setPublishedOn(LocalDateTime.now());
-
-        //    Long requests = requestRepository.countConfirmedRequest(eventId);//TODO
-//        long eventViews = getEventViews(savedEvent);//TODO
+        Integer requests = requestRepository.countConfirmedRequest(eventId);
+        long eventViews = getEventViews(savedEvent);
 
         Event updated = eventRepository.save(savedEvent);
+        updated.setViews(eventViews);
+        updated.setConfirmedRequests(requests);
         return eventMapper.toEventFullDto(updated);
-
     }
 
     @Override
