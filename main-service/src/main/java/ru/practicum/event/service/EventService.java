@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface EventService {
 
-//    Приватные пользователи
+    //    Приватные пользователи
     List<EventShortDto> getAll(PrivateEventParams params);
 
     EventFullDto create(long userId, NewEventDto newEventDto);

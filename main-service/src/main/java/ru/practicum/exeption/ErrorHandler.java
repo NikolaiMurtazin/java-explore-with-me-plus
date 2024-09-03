@@ -24,11 +24,22 @@ public class ErrorHandler {
         );
     }
 
+    @ExceptionHandler({WrongDateException.class})
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleWrongDateException(final WrongDateException ex) {
+        return new ApiError(
+                HttpStatus.BAD_REQUEST.name(),
+                "Incorrectly made request.",
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+    }
+
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleConflictException(final ConflictException ex) {
         return new ApiError(
-                HttpStatus.NOT_FOUND.name(),
+                HttpStatus.CONFLICT.name(),
                 "Conflict occurred.",
                 ex.getMessage(),
                 LocalDateTime.now()

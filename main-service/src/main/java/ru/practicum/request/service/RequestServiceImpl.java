@@ -19,6 +19,8 @@ import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,29 +55,28 @@ public class RequestServiceImpl implements RequestService {
         if (event.getInitiator().getId().equals(userId)) {
             throw new ConflictException("The initiator of the event can't add a request to participate in his event");
         }
-
+        if (!requestRepository.findByEventAndRequester(event, requester).isEmpty()) {
+            throw new ConflictException("Repeatable request not allowed");
+        }
         if (!event.getState().equals(EventState.PUBLISHED)) {
             throw new ConflictException("Event not published");
         }
-
-        if (event.getParticipantLimit() == 0 || event.getParticipantLimit() > event.getConfirmedRequests()) {
-            event.setConfirmedRequests(event.getConfirmedRequests() + 1);
-        } else {
+        Integer countConfirmedRequest = requestRepository.countConfirmedRequest(evenId);
+        if (!(event.getParticipantLimit() == 0) && event.getParticipantLimit() < countConfirmedRequest) {
             throw new ConflictException("The event has reached the limit of participation requests");
         }
-
+        event.setConfirmedRequests(countConfirmedRequest);
         Request request = new Request();
         request.setRequester(requester);
         request.setEvent(event);
         request.setCreated(LocalDateTime.now());
 
-        if (event.isRequestModeration()) {
+        if (event.isRequestModeration() && event.getParticipantLimit() != 0) {
             request.setStatus(RequestStatus.PENDING);
         } else {
             request.setStatus(RequestStatus.CONFIRMED);
         }
 
-        eventRepository.save(event);
         return requestMapper.toParticipationRequestDto(requestRepository.save(request));
     }
 
@@ -84,7 +85,7 @@ public class RequestServiceImpl implements RequestService {
     public ParticipationRequestDto cancel(long userId, long requestId) { // todo вроде выглядит норм, но не проверял
         getUser(userId);
         Request request = getRequest(requestId);
-        request.setStatus(RequestStatus.REJECTED);
+        request.setStatus(RequestStatus.CANCELED);
         Request saved = requestRepository.save(request);
         return requestMapper.toParticipationRequestDto(saved);
     }
@@ -102,11 +103,29 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public EventRequestStatusUpdateResult updateStatus(RequestParamsUpdate params) {
         User user = getUser(params.getUserId());
         Event event = getUserEvent(params.getEventId(), user);
-        checkEventRequestLimit(event);
-        return null;
+        List<Long> requestIds = params.getDto().getRequestIds();
+        List<ParticipationRequestDto> updatedRequests = new ArrayList<>();
+        if (params.getDto().getStatus().equals(RequestStatus.REJECTED)) {
+            for (Long requestId : requestIds) {
+                Request request = getRequest(requestId);
+                request.setStatus(RequestStatus.REJECTED);
+                ParticipationRequestDto participationRequestDto = requestMapper.toParticipationRequestDto(requestRepository.save(request));
+                updatedRequests.add(participationRequestDto);
+            }
+            return new EventRequestStatusUpdateResult(Collections.emptyList(), updatedRequests);
+        } else {
+            for (Long requestId : requestIds) {
+                Request request = getRequest(requestId);
+                checkEventRequestLimit(event);
+                request.setStatus(RequestStatus.CONFIRMED);
+                updatedRequests.add(requestMapper.toParticipationRequestDto(requestRepository.save(request)));
+            }
+            return new EventRequestStatusUpdateResult(updatedRequests, Collections.emptyList());
+        }
     }
 
     private void checkEventRequestLimit(Event event) {
