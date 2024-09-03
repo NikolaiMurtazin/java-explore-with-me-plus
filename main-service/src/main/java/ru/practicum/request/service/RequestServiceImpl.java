@@ -38,7 +38,7 @@ public class RequestServiceImpl implements RequestService {
     private final EventRepository eventRepository;
 
     @Override
-    public List<ParticipationRequestDto> getAll(long userId) { // todo не проверял
+    public List<ParticipationRequestDto> getAll(long userId) {
         User user = getUser(userId);
         List<Request> requests = requestRepository.findByRequester(user);
         return requests.stream()
@@ -48,7 +48,7 @@ public class RequestServiceImpl implements RequestService {
 
     @Override
     @Transactional
-    public ParticipationRequestDto create(long userId, long evenId) { // todo выдает ошибку 500
+    public ParticipationRequestDto create(long userId, long evenId) {
         User requester = getUser(userId);
         Event event = getEvent(evenId);
 
