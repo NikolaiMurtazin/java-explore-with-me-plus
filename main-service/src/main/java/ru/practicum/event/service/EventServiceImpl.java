@@ -318,9 +318,6 @@ public class EventServiceImpl implements EventService {
     @Transactional
     public EventFullDto update(long eventId, UpdateEventAdminRequest eventDto) {
         Event savedEvent = getEvent(eventId);
-        if (savedEvent.getState().equals(EventState.PUBLISHED) && savedEvent.getPublishedOn().plusHours(1).isAfter(eventDto.getEventDate())) {
-            throw new ConflictException("Different with publishedOn less than 1 hours");
-        }
         if (eventDto.getStateAction() != null) {
             if (eventDto.getStateAction().equals(EventAction.PUBLISH_EVENT) && !savedEvent.getState().equals(EventState.PENDING)) {
                 throw new ConflictException("Event in state " + savedEvent.getState() + " can not be published");
@@ -333,6 +330,12 @@ public class EventServiceImpl implements EventService {
             }
         }
 
+        if (eventDto.getEventDate() != null) {
+            if (savedEvent.getState().equals(EventState.PUBLISHED) && savedEvent.getPublishedOn().plusHours(1).isAfter(eventDto.getEventDate())) {
+                throw new ConflictException("Different with publishedOn less than 1 hours");
+            }
+            savedEvent.setEventDate(eventDto.getEventDate());
+        }
         if (eventDto.getAnnotation() != null) {
             savedEvent.setAnnotation(eventDto.getAnnotation());
         }
@@ -342,9 +345,7 @@ public class EventServiceImpl implements EventService {
         if (eventDto.getLocation() != null) {
             savedEvent.setLocation(locationRepository.save(eventDto.getLocation()));
         }
-        if (eventDto.getEventDate() != null) {
-            savedEvent.setEventDate(eventDto.getEventDate());
-        }
+
         if (eventDto.getCategory() != null) {
             Category category = getCategory(eventDto.getCategory());
             savedEvent.setCategory(category);
