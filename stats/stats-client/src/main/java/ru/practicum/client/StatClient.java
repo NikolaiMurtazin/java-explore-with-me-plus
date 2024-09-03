@@ -1,5 +1,6 @@
 package ru.practicum.client;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
-
+@Slf4j
 @Component
 public class StatClient {
     private final RestClient restClient;
@@ -48,11 +49,11 @@ public class StatClient {
                     .queryParam("end", encodeDate(params.getEnd()))
                     .queryParam("uris", params.getUris())
                     .queryParam("unique", params.getUnique()).toUriString();
-            return restClient.get()
+            RestClient.ResponseSpec retrieve = restClient.get()
                     .uri(uri)
-                    .retrieve()
-                    .body(new ParameterizedTypeReference<>() {
-                    });
+                    .retrieve();
+            return retrieve.body(new ParameterizedTypeReference<>() {
+            });
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -61,7 +62,6 @@ public class StatClient {
 
     private String encodeDate(LocalDateTime date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        String formatted = date.format(formatter);
-        return formatted;
+        return date.format(formatter);
     }
 }
