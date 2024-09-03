@@ -113,7 +113,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (updateCompilationRequest.getTitle() != null) {
             compilation.setTitle(updateCompilationRequest.getTitle());
         }
-        if (compilation.getPinned() != null) {
+        if (updateCompilationRequest.getPinned() != null) {
             compilation.setPinned(updateCompilationRequest.getPinned());
         }
         //TODO достать views  requests и положить в маппер
@@ -134,7 +134,7 @@ public class CompilationServiceImpl implements CompilationService {
 
         BooleanExpression finalCondition = conditions.stream()
                 .reduce(BooleanExpression::and)
-                .orElse(null);
+                .orElse(compilation.isNotNull());
 
         PageRequest pageRequest = PageRequest.of(params.getFrom() / params.getSize(), params.getSize());
 
