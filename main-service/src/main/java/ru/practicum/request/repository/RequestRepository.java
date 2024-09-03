@@ -25,15 +25,15 @@ public interface RequestRepository extends JpaRepository<Request, Long>, Queryds
             "WHERE e.id IN ?1 " +
             "GROUP BY e.id, e.participantLimit " +
             "HAVING COUNT(r.id) >= e.participantLimit")
-    List<EventCountByRequest> findConfirmedRequestWithLimitCheck(List<Long> eventIds);
+    List<EventCountByRequest> findConfirmedRequestWithLimitCheck(List<Event> events);
 
     @Query(value = "SELECT new ru.practicum.request.dto.EventCountByRequest(e.id, COUNT(r.id)) " +
             "FROM Event e " +
             "LEFT JOIN Request r ON r.event.id = e.id AND r.status = 'CONFIRMED' " +
-            "WHERE e.id IN ?1 " +
+            "WHERE e IN ?1 " +
             "GROUP BY e.id")
         //TODO
-    List<EventCountByRequest> findConfirmedRequestWithoutLimitCheck(List<Long> eventIds);
+    List<EventCountByRequest> findConfirmedRequestWithoutLimitCheck(List<Event> events);
 
 
     @Query(value = "SELECT (COUNT(r.id)>=?2) " +

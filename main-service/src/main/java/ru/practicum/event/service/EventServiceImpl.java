@@ -71,15 +71,14 @@ public class EventServiceImpl implements EventService {
         BooleanExpression finalConditional = conditions.stream().reduce(BooleanExpression::and).get();
 
         List<Event> events = eventRepository.findAll(finalConditional, pageRequest).getContent();
-        List<Long> listEventIds = events.stream().map(Event::getId).toList();
         if (events.isEmpty()) {
             return Collections.emptyList();
         }
         List<EventCountByRequest> eventsIdWithViews;
         if (params.getOnlyAvailable()) {
-            eventsIdWithViews = requestRepository.findConfirmedRequestWithLimitCheck(listEventIds);
+            eventsIdWithViews = requestRepository.findConfirmedRequestWithLimitCheck(events);
         } else {
-            eventsIdWithViews = requestRepository.findConfirmedRequestWithoutLimitCheck(listEventIds);
+            eventsIdWithViews = requestRepository.findConfirmedRequestWithoutLimitCheck(events);
         }
 
         List<String> uris = eventsIdWithViews.stream()
@@ -172,10 +171,9 @@ public class EventServiceImpl implements EventService {
         if (events.isEmpty()) {
             return Collections.emptyList();
         }
-        List<Long> listEventIds = events.stream().map(Event::getId).toList();
 
         List<EventCountByRequest> eventsIdWithViews
-                = requestRepository.findConfirmedRequestWithoutLimitCheck(listEventIds);
+                = requestRepository.findConfirmedRequestWithoutLimitCheck(events);
 
 
         List<String> uris = eventsIdWithViews.stream()
