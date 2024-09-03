@@ -17,7 +17,7 @@ import java.util.Collection;
 public class Compilation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "compilation_id")
     private Long id;
 
     @Column(name = "pinned")

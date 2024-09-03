@@ -10,6 +10,7 @@ import ru.practicum.client.StatClient;
 import ru.practicum.compilation.dto.CompilationDto;
 import ru.practicum.compilation.dto.NewCompilationDto;
 import ru.practicum.compilation.dto.PublicCompilationParams;
+import ru.practicum.compilation.dto.UpdateCompilationRequest;
 import ru.practicum.compilation.mapper.CompilationMapper;
 import ru.practicum.compilation.model.Compilation;
 import ru.practicum.compilation.model.QCompilation;
@@ -94,25 +95,27 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     @Transactional
     public void delete(long compId) {
-        compilationRepository.findById(compId)
+        Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Compilation with id= " + compId + " was not found"));
 
-        compilationRepository.deleteById(compId);
-
+        compilationRepository.delete(compilation);
+        compilationRepository.flush();
     }
 
     @Override
     @Transactional
-    public CompilationDto update(long compId, NewCompilationDto newCompilationDto) {
+    public CompilationDto update(long compId, UpdateCompilationRequest updateCompilationRequest) {
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("Compilation with id= " + compId + " was not found"));
-        if (newCompilationDto.getEvents() != null) {
-            compilation.setEvents(eventService.getByIds(newCompilationDto.getEvents()));
+        if (updateCompilationRequest.getEvents() != null) {
+            compilation.setEvents(eventService.getByIds(updateCompilationRequest.getEvents()));
         }
-        if (newCompilationDto.getTitle() != null) {
-            compilation.setTitle(newCompilationDto.getTitle());
+        if (updateCompilationRequest.getTitle() != null) {
+            compilation.setTitle(updateCompilationRequest.getTitle());
         }
-        compilation.setPinned(newCompilationDto.isPinned());
+        if (compilation.getPinned() != null) {
+            compilation.setPinned(updateCompilationRequest.getPinned());
+        }
         //TODO достать views  requests и положить в маппер
         Compilation saved = compilationRepository.save(compilation);
         List<EventShortDto> list = getEventShortDtos(saved);
