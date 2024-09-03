@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.client.StatClient;
 import ru.practicum.event.dto.EventFullDto;
+import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.dto.PublicEventRequestParams;
 import ru.practicum.event.model.Sort;
 import ru.practicum.event.service.EventService;
@@ -27,20 +28,19 @@ public class PublicEventsController {
 
     @GetMapping()
     @ResponseStatus(HttpStatus.OK)
-    public List<EventFullDto> getEventsPublic(@RequestParam(value = "text", required = false) String text,
-                                              @RequestParam(value = "categories", required = false) List<Long> categories,
-                                              @RequestParam(value = "paid", required = false) Boolean paid,
-                                              @RequestParam(value = "rangeStart", required = false)
-                                              @DateTimeFormat(pattern = ("dd-MM-yyyy HH:mm:ss")) LocalDateTime rangeStart,
-                                              @RequestParam(value = "rangeEnd", required = false)
-                                              @DateTimeFormat(pattern = ("dd-MM-yyyy HH:mm:ss")) LocalDateTime rangeEnd,
-                                              @RequestParam(value = "onlyAvailable", defaultValue = "false") Boolean onlyAvailable,
-                                              @RequestParam(value = "sort", required = false) Sort sort,
-                                              @RequestParam(value = "from", defaultValue = "0") int from,
-                                              @RequestParam(value = "size", defaultValue = "10") int size,
-                                              HttpServletRequest request) {
+    public List<EventShortDto> getEventsPublic(@RequestParam(value = "text", required = false) String text,
+                                               @RequestParam(value = "categories", required = false) List<Long> categories,
+                                               @RequestParam(value = "paid", required = false) Boolean paid,
+                                               @RequestParam(value = "rangeStart", required = false)
+                                               @DateTimeFormat(pattern = ("yyyy-MM-dd HH:mm:ss")) LocalDateTime rangeStart,
+                                               @RequestParam(value = "rangeEnd", required = false)
+                                               @DateTimeFormat(pattern = ("yyyy-MM-dd HH:mm:ss")) LocalDateTime rangeEnd,
+                                               @RequestParam(value = "onlyAvailable", defaultValue = "false") Boolean onlyAvailable,
+                                               @RequestParam(value = "sort", required = false) Sort sort,
+                                               @RequestParam(value = "from", defaultValue = "0") int from,
+                                               @RequestParam(value = "size", defaultValue = "10") int size,
+                                               HttpServletRequest request) {
 
-        sendStats(request);
 
         Map<String, LocalDateTime> ranges = validDate(rangeStart, rangeEnd);
         PublicEventRequestParams params = PublicEventRequestParams.builder()
@@ -54,35 +54,36 @@ public class PublicEventsController {
                 .from(from)
                 .size(size)
                 .build();
-        eventService.getAll(params);
-        return List.of();
+        List<EventShortDto> all = eventService.getAll(params);
+        sendStats(request);
+        return all;
     }
 
     @GetMapping("/{eventId}")
     @ResponseStatus(HttpStatus.OK)
     public EventFullDto getEvent(@PathVariable("eventId") long eventId, HttpServletRequest request) {
-
+        EventFullDto event = eventService.getById(eventId);
         sendStats(request);
-
-        return eventService.getById(eventId);
+        return event;
     }
 
     private Map<String, LocalDateTime> validDate(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
-        if (rangeEnd.isBefore(rangeStart)) {
+        if (rangeEnd != null && rangeStart != null && rangeEnd.isBefore(rangeStart)) {
             throw new WrongDateException("Range end must be after range start");
         }
-        if (rangeStart == null) {
-            return Map.of("rangeStart", LocalDateTime.now(),
-                    "rangeEnd", rangeEnd);
-        } else {
-            return Map.of("rangeStart", rangeStart,
-                    "rangeEnd", rangeEnd);
-        }
+        LocalDateTime effectiveRangeStart = rangeStart != null ? rangeStart : LocalDateTime.now();
+        LocalDateTime effectiveRangeEnd = rangeEnd != null ? rangeEnd : effectiveRangeStart.plusYears(200);
+
+        return Map.of("rangeStart", effectiveRangeStart, "rangeEnd", effectiveRangeEnd);
     }
 
     private void sendStats(HttpServletRequest request) {
         String ip = request.getRemoteAddr();
         String uri = request.getRequestURI();
+        Map<String, String[]> parameterMap = request.getParameterMap();
+        for (Map.Entry<String, String[]> entry : parameterMap.entrySet()) {
+            uri = uri + "?" + entry.getKey() + "=" + String.join("&", entry.getValue());
+        }
         EndpointHitDTO dto = EndpointHitDTO.builder()
                 .app("ewm-main-service")
                 .ip(ip)

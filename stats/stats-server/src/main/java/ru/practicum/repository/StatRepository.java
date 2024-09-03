@@ -23,7 +23,7 @@ public interface StatRepository extends JpaRepository<EndpointHit, Long> {
     @Query("SELECT new ru.practicum.stat.ViewStatsDTO(e.app, e.uri, COUNT(e.ip)) " +
             "FROM EndpointHit e " +
             "WHERE e.timestamp between :start AND :end " +
-            "GROUP BY e.app, e.uri " +
+            "GROUP BY  e.app, e.uri " +
             "ORDER By COUNT(e.ip) DESC")
     List<ViewStatsDTO> findAllByNonUniqueIp(@Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 

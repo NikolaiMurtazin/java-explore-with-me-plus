@@ -68,7 +68,7 @@ public class CompilationServiceImpl implements CompilationService {
 
 
         List<EventShortDto> list = compEvents.stream().map(ev -> {
-            Long request = requestRepository.countConfirmedRequest(ev.getId());
+            Integer request = requestRepository.countConfirmedRequest(ev.getId());
             User user = ev.getInitiator();
             UserShortDto userDto = userMapper.toUserShortDto(user);
 
