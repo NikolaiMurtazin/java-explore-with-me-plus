@@ -20,12 +20,11 @@ import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.service.EventService;
 import ru.practicum.exeption.NotFoundException;
+import ru.practicum.request.dto.EventCountByRequest;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.stat.StatsParams;
 import ru.practicum.stat.ViewStatsDTO;
-import ru.practicum.user.dto.UserShortDto;
 import ru.practicum.user.mapper.UserMapper;
-import ru.practicum.user.model.User;
 import ru.practicum.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
@@ -65,31 +64,42 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     private List<EventShortDto> getEventShortDtos(Compilation saved) {
-        Collection<Event> compEvents = saved.getEvents();
+        List<Event> compEvents = (List<Event>) saved.getEvents();
+
+        List<EventCountByRequest> eventsIdWithViews =
+                requestRepository.findConfirmedRequestWithoutLimitCheck(compEvents);
 
 
-        List<EventShortDto> list = compEvents.stream().map(ev -> {
-            Integer request = requestRepository.countConfirmedRequest(ev.getId());
-            User user = ev.getInitiator();
-            UserShortDto userDto = userMapper.toUserShortDto(user);
+        List<String> uris = eventsIdWithViews.stream()
+                .map(ev -> "/events/" + ev.getEventId())
+                .toList();
 
-            List<String> listEndpoint = List.of("/events/" + ev.getId());
-            StatsParams statsParams = StatsParams.builder()
-                    .uris(listEndpoint)
-                    .unique(false)
-                    .start(LocalDateTime.MIN)
-                    .end(LocalDateTime.now())
-                    .end(LocalDateTime.now()).build();
-            List<ViewStatsDTO> stats = statClient.getStats(statsParams);
-            long views;
-            if (stats.isEmpty()) {
-                views = 0L;
-            } else {
-                views = stats.getFirst().getHits();
-            }
-            return eventMapper.toEventShortDto(ev);
-        }).toList();
-        return list;
+        StatsParams statsParams = StatsParams.builder()
+                .uris(uris)
+                .unique(true)
+                .start(LocalDateTime.now().minusYears(100))
+                .end(LocalDateTime.now())
+                .build();
+
+        List<ViewStatsDTO> viewStatsDTOS = statClient.getStats(statsParams);
+
+        return eventsIdWithViews.stream()
+                .map(ev -> {
+                    Event finalEvent = compEvents.stream()
+                            .filter(e -> e.getId().equals(ev.getEventId()))
+                            .findFirst()
+                            .orElseThrow(() -> new IllegalStateException("Event not found: " + ev.getEventId()));
+
+                    long views = viewStatsDTOS.stream()
+                            .filter(stat -> stat.getUri().equals("/events/" + ev.getEventId()))
+                            .map(ViewStatsDTO::getHits)
+                            .findFirst()
+                            .orElse(0L);
+                    finalEvent.setConfirmedRequests(Math.toIntExact(ev.getCount()));
+                    finalEvent.setViews(views);
+                    return eventMapper.toEventShortDto(finalEvent);
+                })
+                .toList();
     }
 
     @Override
