@@ -1,6 +1,7 @@
 package ru.practicum.event.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -78,14 +79,8 @@ public class PublicEventsController {
     }
 
     private void sendStats(HttpServletRequest request) {
-        String ip = request.getRemoteAddr();
-        String uri = request.getRequestURI();
-        EndpointHitDTO dto = EndpointHitDTO.builder()
-                .app("ewm-main-service")
-                .ip(ip)
-                .uri(uri)
-                .timestamp(LocalDateTime.now())
-                .build();
-        statClient.saveStats(dto);
+
+
+        statClient.saveStats(request);
     }
 }

@@ -70,8 +70,4 @@ public class Event {
 
     @Column(name = "title", nullable = false)
     private String title;
-
-    @Column(name = "views")
-    @Transient
-    private Long views = 0L;
 }

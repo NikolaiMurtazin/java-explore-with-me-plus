@@ -1,9 +1,9 @@
 package ru.practicum.event.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.AdminEventRequestParams;
@@ -26,7 +26,6 @@ public class AdminEventsController {
     private final EventService eventService;
 
     @GetMapping("/events")
-    @ResponseStatus(HttpStatus.OK)
     public List<EventFullDto> getEvents(@RequestParam(value = "users", required = false) List<Long> users,
                                         @RequestParam(value = "states", required = false) List<EventState> states,
                                         @RequestParam(value = "categories", required = false) List<Long> categories,
@@ -51,8 +50,7 @@ public class AdminEventsController {
     }
 
     @PatchMapping("/events/{eventId}")
-    @ResponseStatus(HttpStatus.OK)
-    public EventFullDto updateEvent(@Valid @PathVariable long eventId,
+    public EventFullDto updateEvent(@Positive @PathVariable long eventId,
                                     @Valid @RequestBody UpdateEventAdminRequest dto) {
 
         return eventService.update(eventId, dto);

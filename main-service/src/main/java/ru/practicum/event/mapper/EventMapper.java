@@ -20,13 +20,12 @@ import java.time.LocalDateTime;
         injectionStrategy = InjectionStrategy.CONSTRUCTOR
 )
 public interface EventMapper {
-
-    EventFullDto toEventFullDto(final Event event);
+    @Mapping(target = "views", source = "views")
+    EventFullDto toEventFullDto(final Event event,final long views);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
     @Mapping(target = "confirmedRequests", ignore = true)
-    @Mapping(target = "views", ignore = true)
     @Mapping(target = "category", source = "category")
     @Mapping(target = "location", source = "location")
     @Mapping(target = "initiator", source = "initiator")
@@ -35,5 +34,6 @@ public interface EventMapper {
     Event toEvent(final NewEventDto newEventDto, final Category category, final Location location,
                   final User initiator, final EventState state, LocalDateTime createdOn);
 
-    EventShortDto toEventShortDto(final Event event);
+    @Mapping(target = "views", source = "views")
+    EventShortDto toEventShortDto(final Event event,final long views);
 }

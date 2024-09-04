@@ -65,12 +65,11 @@ public class CategoryServiceImpl implements CategoryService {
         Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size);
         Page<Category> categoriesPage = categoryRepository.findAll(pageable);
 
-        if (categoriesPage.hasContent()) {
-            return categoriesPage.getContent().stream()
-                    .map(categoryMapper::toCategoryDto)
-                    .collect(Collectors.toList());
-        }
-        return new ArrayList<>();
+      return  categoryRepository
+                .findAll(pageable)
+                .stream()
+                .map(categoryMapper::toCategoryDto)
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package ru.practicum.client;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +23,7 @@ import java.util.List;
 @Slf4j
 @Component
 public class StatClient {
-//    private final RestClient restClient;
-        private final RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
     private final String startUrl;
 
     @Autowired
@@ -33,22 +33,23 @@ public class StatClient {
         factory.setConnectTimeout(10000);
         factory.setConnectionRequestTimeout(10000);
         restTemplate = new RestTemplate(factory);
-//        restClient = RestClient.builder()
-//                .baseUrl(startUrl)
-//                .requestFactory(factory)
-//                .build();
     }
 
-    public void saveStats(EndpointHitDTO dto) {
+    public void saveStats(HttpServletRequest request) {
         try {
+            String ip = request.getRemoteAddr();
+            String uri = request.getRequestURI();
+            EndpointHitDTO dto = EndpointHitDTO.builder()
+                    .app("ewm-main-service")
+                    .ip(ip)
+                    .uri(uri)
+                    .timestamp(LocalDateTime.now())
+                    .build();
+
             restTemplate.postForObject(startUrl + "/hit", dto, String.class);
-//            restClient.post()
-//                    .uri(startUrl+"/hit")
-//                    .contentType(MediaType.APPLICATION_JSON)
-//                    .body(dto)
-//                    .retrieve();
+
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn(e.getMessage());
         }
 
 
@@ -56,22 +57,17 @@ public class StatClient {
 
     public List<ViewStatsDTO> getStats(StatsParams params) {
         try {
-
             String uri = UriComponentsBuilder.fromPath("/stats")
                     .queryParam("start", encodeDate(params.getStart()))
                     .queryParam("end", encodeDate(params.getEnd()))
                     .queryParam("uris", params.getUris())
                     .queryParam("unique", params.getUnique()).toUriString();
-//            RestClient.ResponseSpec retrieve = restClient.get()
-//                    .uri(startUrl+uri)
-//                    .retrieve();
-//            return retrieve.body(new ParameterizedTypeReference<List<ViewStatsDTO>>() {
-//            });
-            ResponseEntity<List<ViewStatsDTO>> response = restTemplate.exchange(startUrl + uri, HttpMethod.GET, null, new ParameterizedTypeReference<List<ViewStatsDTO>>() {
-            });
+            ResponseEntity<List<ViewStatsDTO>> response = restTemplate.exchange(startUrl + uri,
+                    HttpMethod.GET, null, new ParameterizedTypeReference<List<ViewStatsDTO>>() {
+                    });
             return response.getBody();
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn(e.getMessage());
         }
         return Collections.emptyList();
     }
