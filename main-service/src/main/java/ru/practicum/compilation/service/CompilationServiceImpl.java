@@ -99,7 +99,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (updateCompilationRequest.getPinned() != null) {
             compilation.setPinned(updateCompilationRequest.getPinned());
         }
-        //TODO достать views  requests и положить в маппер
+
         Compilation saved = compilationRepository.save(compilation);
         List<EventShortDto> list = getEventShortDtos(saved);
 

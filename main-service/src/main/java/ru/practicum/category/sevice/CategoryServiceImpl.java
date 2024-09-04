@@ -1,7 +1,6 @@
 package ru.practicum.category.sevice;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -62,7 +61,6 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryDto> getAll(int from, int size) {
         Pageable pageable = PageRequest.of(from > 0 ? from / size : 0, size);
-        Page<Category> categoriesPage = categoryRepository.findAll(pageable);
 
       return  categoryRepository
                 .findAll(pageable)

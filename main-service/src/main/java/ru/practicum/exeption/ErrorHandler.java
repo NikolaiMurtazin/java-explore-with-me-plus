@@ -83,7 +83,7 @@ public class ErrorHandler {
     }
 
 
-    @ExceptionHandler // вот с этим я хз. Так как в ApiError нет stackTrace
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleThrowable(final Throwable ex) {
 
