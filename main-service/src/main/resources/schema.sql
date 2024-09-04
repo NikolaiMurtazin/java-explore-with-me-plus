@@ -42,7 +42,6 @@ CREATE TABLE IF NOT EXISTS events
     request_moderation BOOLEAN,
     state              VARCHAR(100)                            NOT NULL,
     title              VARCHAR(120)                            NOT NULL,
-    views              BIGINT,
     CONSTRAINT events_location FOREIGN KEY (location_id) REFERENCES locations (location_id) ON DELETE CASCADE,
     CONSTRAINT category_names FOREIGN KEY (category_id) REFERENCES categories (category_id) ON DELETE CASCADE,
     CONSTRAINT initiator_constraint FOREIGN KEY (initiator_id) REFERENCES users (user_id) ON DELETE CASCADE

@@ -1,33 +1,21 @@
 package ru.practicum.request.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
-
 public enum RequestStatus {
-    PENDING("PENDING"),
-    REJECTED("REJECTED"),
-    CANCELED("CANCELED"),
+    PENDING,
 
-    CONFIRMED("CONFIRMED");
+    REJECTED,
 
-    private final String value;
+    CANCELED,
 
-    RequestStatus(String value) {
-        this.value = value;
-    }
+    CONFIRMED;
 
-    @Override
-    @JsonValue
-    public String toString() {
-        return String.valueOf(value);
-    }
 
-    @JsonCreator
-    public static RequestStatus fromValue(String text) {
-        for (RequestStatus b : RequestStatus.values()) {
-            if (String.valueOf(b.value).equals(text)) {
-                return b;
+    public static RequestStatus fromValue(String statusString) {
+        for (RequestStatus status : RequestStatus.values()) {
+            if (status.name().equals(statusString)) {
+                return status;
             }
+            throw new IllegalArgumentException("Wrong status enum [" + statusString + "]");
         }
         return null;
     }
