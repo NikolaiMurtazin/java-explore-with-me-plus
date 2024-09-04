@@ -50,8 +50,8 @@ public class StatController {
                 .unique(unique)
                 .uris(uris)
                 .build();
-
-        return statService.getStats(statsParams);
+        List<ViewStatsDTO> stats = statService.getStats(statsParams);
+        return stats;
     }
 
     private void validDate(LocalDateTime rangeStart, LocalDateTime rangeEnd) {
