@@ -1,35 +1,20 @@
 package ru.practicum.event.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
-
 public enum EventState {
 
-    PENDING("PENDING"),
+    PENDING,
 
-    PUBLISHED("PUBLISHED"),
+    PUBLISHED,
 
-    CANCELED("CANCELED");
+    CANCELED;
 
-    private final String value;
 
-    EventState(String value) {
-        this.value = value;
-    }
-
-    @Override
-    @JsonValue
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static EventState fromValue(@JsonProperty("state") String text) {
-        for (EventState b : EventState.values()) {
-            if (String.valueOf(b.value).equals(text)) {
-                return b;
+    public static EventState fromValue(String eventStateString) {
+        for (EventState state : EventState.values()) {
+            if (state.name().equals(eventStateString)) {
+                return state;
             }
+            throw new IllegalArgumentException("Wrong eventState enum [" + eventStateString + "]");
         }
         return null;
     }

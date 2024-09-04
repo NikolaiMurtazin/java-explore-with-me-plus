@@ -16,11 +16,11 @@ import java.util.List;
 @Builder
 public class AdminEventRequestParams {
 
-    List<Long> users;
-    List<EventState> states;
-    List<Long> categories;
-    LocalDateTime rangeStart;
-    LocalDateTime rangeEnd;
-    int from;
-    int size;
+   private List<Long> users;
+   private List<EventState> states;
+   private List<Long> categories;
+   private LocalDateTime rangeStart;
+   private LocalDateTime rangeEnd;
+   private int from;
+   private int size;
 }

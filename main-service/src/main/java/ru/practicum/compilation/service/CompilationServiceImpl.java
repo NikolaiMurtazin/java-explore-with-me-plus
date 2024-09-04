@@ -17,7 +17,7 @@ import ru.practicum.compilation.repository.CompilationRepository;
 import ru.practicum.event.dto.EventShortDto;
 import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
-import ru.practicum.event.service.EventService;
+import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exeption.NotFoundException;
 import ru.practicum.request.dto.EventCountByRequest;
 import ru.practicum.request.repository.RequestRepository;
@@ -35,7 +35,7 @@ import java.util.stream.StreamSupport;
 @Transactional(readOnly = true)
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
-    private final EventService eventService;
+    private final EventRepository eventRepository;
     private final RequestRepository requestRepository;
     private final StatClient statClient;
     private final EventMapper eventMapper;
@@ -48,7 +48,7 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto create(NewCompilationDto newCompilationDto) {
         Collection<Event> events = new ArrayList<>();
         if (newCompilationDto.getEvents() != null) {
-            events = eventService.getByIds(newCompilationDto.getEvents());
+            events = eventRepository.findByIdIn(newCompilationDto.getEvents());
         }
         Compilation compilation = compilationMapper.toCompilation(newCompilationDto, events);
         Compilation saved = compilationRepository.save(compilation);
@@ -73,8 +73,7 @@ public class CompilationServiceImpl implements CompilationService {
 
             long views = viewStatsDTOS.stream().filter(stat -> stat.getUri().equals("/events/" + ev.getEventId())).map(ViewStatsDTO::getHits).findFirst().orElse(0L);
             finalEvent.setConfirmedRequests(Math.toIntExact(ev.getCount()));
-            finalEvent.setViews(views);
-            return eventMapper.toEventShortDto(finalEvent);
+            return eventMapper.toEventShortDto(finalEvent,views);
         }).toList();
     }
 
@@ -92,7 +91,7 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto update(long compId, UpdateCompilationRequest updateCompilationRequest) {
         Compilation compilation = compilationRepository.findById(compId).orElseThrow(() -> new NotFoundException("Compilation with id= " + compId + " was not found"));
         if (updateCompilationRequest.getEvents() != null) {
-            compilation.setEvents(eventService.getByIds(updateCompilationRequest.getEvents()));
+            compilation.setEvents(eventRepository.findByIdIn(updateCompilationRequest.getEvents()));
         }
         if (updateCompilationRequest.getTitle() != null) {
             compilation.setTitle(updateCompilationRequest.getTitle());

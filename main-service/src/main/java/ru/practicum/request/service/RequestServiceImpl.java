@@ -83,9 +83,12 @@ public class RequestServiceImpl implements RequestService {
 
     @Transactional
     @Override
-    public ParticipationRequestDto cancel(long userId, long requestId) { // todo вроде выглядит норм, но не проверял
+    public ParticipationRequestDto cancel(long userId, long requestId) {
         getUser(userId);
         Request request = getRequest(requestId);
+        if (request.getRequester().getId() != userId) {
+            throw new ConflictException("User is not requester");
+        }
         request.setStatus(RequestStatus.CANCELED);
         Request saved = requestRepository.save(request);
         return requestMapper.toParticipationRequestDto(saved);

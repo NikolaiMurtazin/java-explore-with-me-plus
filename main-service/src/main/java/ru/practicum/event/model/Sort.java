@@ -1,33 +1,16 @@
 package ru.practicum.event.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonValue;
-
 public enum Sort {
-    EVENT_DATE("EVENT_DATE"),
+    EVENT_DATE,
+    VIEWS;
 
-    VIEWS("VIEWS");
 
-    private final String value;
-
-    Sort(String value) {
-        this.value = value;
-    }
-
-    @Override
-    @JsonValue
-    public String toString() {
-        return String.valueOf(value);
-    }
-
-    @JsonCreator
-    public static Sort fromValue(@JsonProperty("sort") String text) {
-        for (Sort b : Sort.values()) {
-            if (String.valueOf(b.value).equals(text)) {
-                return b;
+    public static Sort from(String sortString) {
+        for (Sort sort : Sort.values()) {
+            if (sort.name().equalsIgnoreCase(sortString)) {
+                return sort;
             }
         }
-        return null;
+        throw new IllegalArgumentException("Wrong sort enum [" + sortString + "]");
     }
 }
