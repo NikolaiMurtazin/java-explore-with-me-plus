@@ -6,7 +6,6 @@ import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants;
 import ru.practicum.user.dto.NewUserRequest;
 import ru.practicum.user.dto.UserDto;
-import ru.practicum.user.dto.UserShortDto;
 import ru.practicum.user.model.User;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
@@ -15,6 +14,4 @@ public interface UserMapper {
     User toUser(final NewUserRequest newUserRequest);
 
     UserDto toUserDto(final User user);
-
-    UserShortDto toUserShortDto(final User user);
 }

@@ -1,37 +1,49 @@
 package ru.practicum.aspect;
 
-import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-
-import java.util.Arrays;
+import lombok.extern.slf4j.Slf4j;
 
 @Aspect
 @Component
 @Slf4j
 public class LoggingAspect {
 
-    @Before("execution(* ru.practicum.category.controller.*.*(..)) || " +
-            "execution(* ru.practicum.compilation.controller.*.*(..)) || " +
-            "execution(* ru.practicum.event.controller.*.*(..)) || " +
-            "execution(* ru.practicum.request.controller.*.*(..)) || " +
-            "execution(* ru.practicum.user.controller.*.*(..))")
-    public void logBefore(JoinPoint joinPoint) {
-        log.info("Entering in Method :  {}", joinPoint.getSignature().getName());
-        log.info("Class Name :  {}", joinPoint.getSignature().getDeclaringTypeName());
-        log.info("Arguments :  {}", Arrays.toString(joinPoint.getArgs()));
-    }
+    @Around("@within(org.springframework.web.bind.annotation.RestController)")
+    public Object logAroundController(ProceedingJoinPoint joinPoint) throws Throwable {
+        long startTime = System.currentTimeMillis();
 
-    @AfterReturning(pointcut = "execution(* ru.practicum.category.controller.*.*(..)) || " +
-            "execution(* ru.practicum.compilation.controller.*.*(..)) || " +
-            "execution(* ru.practicum.event.controller.*.*(..)) || " +
-            "execution(* ru.practicum.request.controller.*.*(..)) || " +
-            "execution(* ru.practicum.user.controller.*.*(..))", returning = "result")
-    public void logAfter(JoinPoint joinPoint, Object result) {
-        log.info("Method Return value : {}", result);
-        log.info("Exiting from Method :  {}", joinPoint.getSignature().getName());
+        log.info("Executing {}.{} with arguments: {}",
+                joinPoint.getSignature().getDeclaringTypeName(),
+                joinPoint.getSignature().getName(),
+                joinPoint.getArgs());
+
+        try {
+            Object result = joinPoint.proceed();
+
+            long duration = System.currentTimeMillis() - startTime;
+            if (result instanceof ResponseEntity<?> response) {
+                log.info("Completed {}.{} with status: {} in {} ms",
+                        joinPoint.getSignature().getDeclaringTypeName(),
+                        joinPoint.getSignature().getName(),
+                        response.getStatusCode(),
+                        duration);
+            } else {
+                log.info("Completed {}.{} in {} ms",
+                        joinPoint.getSignature().getDeclaringTypeName(),
+                        joinPoint.getSignature().getName(),
+                        duration);
+            }
+            return result;
+        } catch (Throwable throwable) {
+            log.error("Exception in {}.{} with cause: '{}'",
+                    joinPoint.getSignature().getDeclaringTypeName(),
+                    joinPoint.getSignature().getName(),
+                    throwable.getMessage(), throwable);
+            throw throwable;
+        }
     }
 }

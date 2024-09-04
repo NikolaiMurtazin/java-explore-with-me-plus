@@ -51,8 +51,6 @@ public class StatClient {
         } catch (Exception e) {
             log.warn(e.getMessage());
         }
-
-
     }
 
     public List<ViewStatsDTO> getStats(StatsParams params) {
@@ -76,6 +74,5 @@ public class StatClient {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return date.format(formatter);
     }
-
 }
 

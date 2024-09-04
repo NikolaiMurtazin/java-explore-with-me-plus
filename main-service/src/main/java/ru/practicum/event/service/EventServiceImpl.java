@@ -101,11 +101,10 @@ public class EventServiceImpl implements EventService {
     }
 
     private static Event getFinalEvent(EventCountByRequest ev, List<Event> events) {
-        Event finalEvent = events.stream()
+        return events.stream()
                 .filter(e -> e.getId().equals(ev.getEventId()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Event not found: " + ev.getEventId()));
-        return finalEvent;
     }
 
     @Override
@@ -194,8 +193,7 @@ public class EventServiceImpl implements EventService {
                 .end(LocalDateTime.now())
                 .build();
 
-        List<ViewStatsDTO> viewStatsDTOS = statClient.getStats(statsParams);
-        return viewStatsDTOS;
+        return statClient.getStats(statsParams);
     }
 
 //    Приватные пользователи
