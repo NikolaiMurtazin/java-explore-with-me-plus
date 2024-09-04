@@ -1,7 +1,6 @@
 package ru.practicum.event.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletRequestWrapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -13,7 +12,6 @@ import ru.practicum.event.dto.PublicEventRequestParams;
 import ru.practicum.event.model.Sort;
 import ru.practicum.event.service.EventService;
 import ru.practicum.exeption.WrongDateException;
-import ru.practicum.stat.EndpointHitDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
