@@ -4,10 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.MediaType;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import ru.practicum.stat.EndpointHitDTO;
 import ru.practicum.stat.StatsParams;
@@ -21,26 +22,31 @@ import java.util.List;
 @Slf4j
 @Component
 public class StatClient {
-    private final RestClient restClient;
+//    private final RestClient restClient;
+        private final RestTemplate restTemplate;
+    private final String startUrl;
 
     @Autowired
     public StatClient(@Value("${client.url}") String startUrl) {
+        this.startUrl = startUrl;
         var factory = new HttpComponentsClientHttpRequestFactory();
         factory.setConnectTimeout(10000);
         factory.setConnectionRequestTimeout(10000);
-        restClient = RestClient.builder()
-                .baseUrl(startUrl)
-                .requestFactory(factory)
-                .build();
+        restTemplate = new RestTemplate(factory);
+//        restClient = RestClient.builder()
+//                .baseUrl(startUrl)
+//                .requestFactory(factory)
+//                .build();
     }
 
     public void saveStats(EndpointHitDTO dto) {
         try {
-            restClient.post()
-                    .uri("/hit")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .body(dto)
-                    .retrieve();
+            restTemplate.postForObject(startUrl + "/hit", dto, String.class);
+//            restClient.post()
+//                    .uri(startUrl+"/hit")
+//                    .contentType(MediaType.APPLICATION_JSON)
+//                    .body(dto)
+//                    .retrieve();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -56,12 +62,14 @@ public class StatClient {
                     .queryParam("end", encodeDate(params.getEnd()))
                     .queryParam("uris", params.getUris())
                     .queryParam("unique", params.getUnique()).toUriString();
-            RestClient.ResponseSpec retrieve = restClient.get()
-
-                    .uri(uri)
-                    .retrieve();
-            return retrieve.body(new ParameterizedTypeReference<>() {
+//            RestClient.ResponseSpec retrieve = restClient.get()
+//                    .uri(startUrl+uri)
+//                    .retrieve();
+//            return retrieve.body(new ParameterizedTypeReference<List<ViewStatsDTO>>() {
+//            });
+            ResponseEntity<List<ViewStatsDTO>> response = restTemplate.exchange(startUrl + uri, HttpMethod.GET, null, new ParameterizedTypeReference<List<ViewStatsDTO>>() {
             });
+            return response.getBody();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -72,4 +80,6 @@ public class StatClient {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return date.format(formatter);
     }
+
 }
+
