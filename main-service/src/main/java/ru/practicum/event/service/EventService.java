@@ -17,15 +17,9 @@ public interface EventService {
 
     EventFullDto update(long userId, long eventId, UpdateEventUserRequest updateEventUserRequest);
 
-    //Public GET /events
-
     List<EventShortDto> getAll(PublicEventRequestParams params);
-    // GET Admin/events
 
     List<EventFullDto> getAll(AdminEventRequestParams params);
-    //Private GET /users/{userId}/events
-
-    //Private /users/{userId}/events/{eventsId}
 
     EventFullDto getById(long userId, long eventId);
 
