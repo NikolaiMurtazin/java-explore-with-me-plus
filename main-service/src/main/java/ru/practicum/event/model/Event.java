@@ -70,4 +70,7 @@ public class Event {
 
     @Column(name = "title", nullable = false)
     private String title;
+
+    @Column(name = "rating", nullable = false)
+    private Integer rating;
 }

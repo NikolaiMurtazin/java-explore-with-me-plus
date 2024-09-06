@@ -42,6 +42,7 @@ CREATE TABLE IF NOT EXISTS events
     request_moderation BOOLEAN,
     state              VARCHAR(100)                            NOT NULL,
     title              VARCHAR(120)                            NOT NULL,
+    rating             INT                                     NOT NULL,
     CONSTRAINT events_location FOREIGN KEY (location_id) REFERENCES locations (location_id) ON DELETE CASCADE,
     CONSTRAINT category_names FOREIGN KEY (category_id) REFERENCES categories (category_id) ON DELETE CASCADE,
     CONSTRAINT initiator_constraint FOREIGN KEY (initiator_id) REFERENCES users (user_id) ON DELETE CASCADE
@@ -72,3 +73,18 @@ CREATE TABLE IF NOT EXISTS compilations_events
     PRIMARY KEY (compilation_id, event_id),
     CONSTRAINT unique_compilation_with_event UNIQUE (compilation_id, event_id)
 );
+
+CREATE TABLE IF NOT EXISTS event_likes
+(
+    user_id  BIGINT NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+    event_id BIGINT NOT NULL REFERENCES events (event_id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, event_id)
+);
+
+CREATE TABLE IF NOT EXISTS event_dislikes
+(
+    user_id  BIGINT NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+    event_id BIGINT NOT NULL REFERENCES events (event_id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, event_id)
+)
+

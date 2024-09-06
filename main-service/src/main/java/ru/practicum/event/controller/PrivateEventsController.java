@@ -1,6 +1,7 @@
 package ru.practicum.event.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
@@ -46,5 +47,33 @@ public class PrivateEventsController {
                                @PathVariable("eventId") long eventId,
                                @Valid @RequestBody UpdateEventUserRequest updateEventUserRequest) {
         return eventService.update(userId, eventId, updateEventUserRequest);
+    }
+
+    @PatchMapping("/{eventId}/like")
+    @ResponseStatus(HttpStatus.OK)
+    public void like(@Min(0) @PathVariable("userId") long userId,
+                     @Min(0) @PathVariable("eventId") long eventId) {
+        eventService.estimate(userId, eventId, true);
+    }
+
+    @PatchMapping("/{eventId}/dislike")
+    @ResponseStatus(HttpStatus.OK)
+    public void dislike(@Min(0) @PathVariable("userId") long userId,
+                        @Min(0) @PathVariable("eventId") long eventId) {
+        eventService.estimate(userId, eventId, false);
+    }
+
+    @DeleteMapping("/{eventId}/like")
+    @ResponseStatus(HttpStatus.OK)
+    public void deletelike(@Min(0) @PathVariable("userId") long userId,
+                           @Min(0) @PathVariable("eventId") long eventId) {
+        eventService.deleteEstimete(userId, eventId, true);
+    }
+
+    @DeleteMapping("/{eventId}/dislike")
+    @ResponseStatus(HttpStatus.OK)
+    public void deleteDislike(@Min(0) @PathVariable("userId") long userId,
+                              @Min(0) @PathVariable("eventId") long eventId) {
+        eventService.deleteEstimete(userId, eventId, false);
     }
 }

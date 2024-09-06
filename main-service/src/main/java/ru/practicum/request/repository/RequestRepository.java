@@ -6,20 +6,25 @@ import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 import ru.practicum.event.model.Event;
 import ru.practicum.request.dto.EventCountByRequest;
 import ru.practicum.request.model.Request;
+import ru.practicum.request.model.RequestStatus;
 import ru.practicum.user.model.User;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface RequestRepository extends JpaRepository<Request, Long>, QuerydslPredicateExecutor<Event> {
 
     List<Request> findByEventAndRequester(Event event, User user);
+
+    Optional<Request> findByEventAndRequesterAndStatus(Event event, User user, RequestStatus status);
+
 
     List<Request> findByRequester(User user);
 
     @Query(value = "SELECT new ru.practicum.request.dto.EventCountByRequest(e.id, COUNT(r.id)) " +
             "FROM Event e " +
             "LEFT JOIN Request r ON r.event.id = e.id AND r.status = 'CONFIRMED' " +
-            "WHERE e.id IN ?1 " +
+            "WHERE e IN ?1 " +
             "GROUP BY e.id, e.participantLimit " +
             "HAVING COUNT(r.id) >= e.participantLimit")
     List<EventCountByRequest> findConfirmedRequestWithLimitCheck(List<Event> events);
