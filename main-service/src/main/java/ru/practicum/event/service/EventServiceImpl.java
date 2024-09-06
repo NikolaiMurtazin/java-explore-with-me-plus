@@ -19,6 +19,7 @@ import ru.practicum.exeption.NotFoundException;
 import ru.practicum.location.model.Location;
 import ru.practicum.location.repository.LocationRepository;
 import ru.practicum.request.dto.EventCountByRequest;
+import ru.practicum.request.model.RequestStatus;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.stat.StatsParams;
 import ru.practicum.stat.ViewStatsDTO;
@@ -238,7 +239,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventMapper.toEvent(newEventDto, category, location, initiator, EventState.PENDING,
                 LocalDateTime.now());
         event.setConfirmedRequests(0);
-
+        event.setRating(0);
         Event saved = eventRepository.save(event);
         return eventMapper.toEventFullDto(saved, 0L);
     }
@@ -372,6 +373,43 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<Event> getByIds(List<Long> events) {
         return eventRepository.findAllById(events);
+    }
+
+    @Override
+    @Transactional
+    public void estimate(long userId, long eventId, boolean rating) {
+        Event event = getEvent(eventId);
+        User user = getUser(userId);
+        if (requestRepository.findByEventAndRequesterAndStatus(event, user, RequestStatus.CONFIRMED).isEmpty()) {
+            throw new ConflictException("User not participant of this event");
+        }
+        if (!event.getState().equals(EventState.PUBLISHED)) {
+            throw new ConflictException("Don't like because the event not published");
+        }
+        if (rating) {
+            eventRepository.operationLike(eventId, userId);
+        } else {
+            eventRepository.operationDislike(eventId, userId);
+        }
+        event.setRating(rating ? event.getRating() + 1 : event.getRating() - 1);
+    }
+
+    @Override
+    @Transactional
+    public void deleteEstimete(long userId, long eventId, boolean rating) {
+        Event event = getEvent(eventId);
+        User user = getUser(userId);
+        if (requestRepository.findByEventAndRequesterAndStatus(event, user, RequestStatus.CONFIRMED).isEmpty()) {
+            throw new ConflictException("User not participant of this event");
+        }
+        if (event.getEventDate().isAfter(LocalDateTime.now())) {
+            throw new ConflictException("Don't like because the event hasn't happened yet");
+        }
+        if (rating) {
+            eventRepository.deleteLike(userId, eventId);
+        } else
+            eventRepository.deleteDislike(userId, eventId);
+        event.setRating(rating ? event.getRating() - 1 : event.getRating() + 1);
     }
 
     private Event getEvent(long eventId) {
