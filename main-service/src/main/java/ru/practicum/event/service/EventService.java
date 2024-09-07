@@ -26,8 +26,4 @@ public interface EventService {
     EventFullDto update(long eventId, UpdateEventAdminRequest event);
 
     Collection<Event> getByIds(List<Long> events);
-
-    void estimate(long userId, long eventId, boolean rating);
-
-    void deleteEstimete(long userId, long eventId, boolean rating);
 }

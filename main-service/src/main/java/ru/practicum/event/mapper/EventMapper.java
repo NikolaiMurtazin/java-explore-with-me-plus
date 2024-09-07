@@ -26,6 +26,7 @@ public interface EventMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "publishedOn", ignore = true)
     @Mapping(target = "confirmedRequests", ignore = true)
+    @Mapping(target = "likeCount", ignore = true)
     @Mapping(target = "category", source = "category")
     @Mapping(target = "location", source = "location")
     @Mapping(target = "initiator", source = "initiator")

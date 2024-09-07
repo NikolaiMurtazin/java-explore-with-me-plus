@@ -3,6 +3,7 @@ package ru.practicum.event.service;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.model.Category;
@@ -19,7 +20,6 @@ import ru.practicum.exeption.NotFoundException;
 import ru.practicum.location.model.Location;
 import ru.practicum.location.repository.LocationRepository;
 import ru.practicum.request.dto.EventCountByRequest;
-import ru.practicum.request.model.RequestStatus;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.stat.StatsParams;
 import ru.practicum.stat.ViewStatsDTO;
@@ -54,8 +54,6 @@ public class EventServiceImpl implements EventService {
 
         conditions.add(event.state.eq(EventState.PUBLISHED));
 
-        PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
-
         conditions.add(event.eventDate.after(params.getRangeStart()));
         conditions.add(event.eventDate.before(params.getRangeEnd()));
         if (params.getText() != null) {
@@ -68,6 +66,25 @@ public class EventServiceImpl implements EventService {
             conditions.add(event.paid.eq(params.getPaid()));
         }
         BooleanExpression finalConditional = conditions.stream().reduce(BooleanExpression::and).get();
+
+        PageRequest pageRequest;
+        if (params.getSort() != null) {
+            switch (params.getSort()) {
+                case EVENT_DATE:
+                    pageRequest = PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(Sort.Direction.ASC, "eventDate"));
+                    break;
+                case VIEWS:
+                    pageRequest = PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(Sort.Direction.DESC, "views"));
+                    break;
+                case TOP_RATING:
+                    pageRequest = PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(Sort.Direction.DESC, "likeCount"));
+                    break;
+                default:
+                    pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
+            }
+        } else {
+            pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
+        }
 
         List<Event> events = eventRepository.findAll(finalConditional, pageRequest).getContent();
         if (events.isEmpty()) {
@@ -239,7 +256,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventMapper.toEvent(newEventDto, category, location, initiator, EventState.PENDING,
                 LocalDateTime.now());
         event.setConfirmedRequests(0);
-        event.setRating(0);
+        event.setLikeCount(0);
         Event saved = eventRepository.save(event);
         return eventMapper.toEventFullDto(saved, 0L);
     }
@@ -375,50 +392,14 @@ public class EventServiceImpl implements EventService {
         return eventRepository.findAllById(events);
     }
 
-    @Override
-    @Transactional
-    public void estimate(long userId, long eventId, boolean rating) {
-        Event event = getEvent(eventId);
-        User user = getUser(userId);
-        if (requestRepository.findByEventAndRequesterAndStatus(event, user, RequestStatus.CONFIRMED).isEmpty()) {
-            throw new ConflictException("User not participant of this event");
-        }
-        if (!event.getState().equals(EventState.PUBLISHED)) {
-            throw new ConflictException("Don't like because the event not published");
-        }
-        if (rating) {
-            eventRepository.operationLike(eventId, userId);
-        } else {
-            eventRepository.operationDislike(eventId, userId);
-        }
-        event.setRating(rating ? event.getRating() + 1 : event.getRating() - 1);
-    }
-
-    @Override
-    @Transactional
-    public void deleteEstimete(long userId, long eventId, boolean rating) {
-        Event event = getEvent(eventId);
-        User user = getUser(userId);
-        if (requestRepository.findByEventAndRequesterAndStatus(event, user, RequestStatus.CONFIRMED).isEmpty()) {
-            throw new ConflictException("User not participant of this event");
-        }
-        if (event.getEventDate().isAfter(LocalDateTime.now())) {
-            throw new ConflictException("Don't like because the event hasn't happened yet");
-        }
-        if (rating) {
-            eventRepository.deleteLike(userId, eventId);
-        } else
-            eventRepository.deleteDislike(userId, eventId);
-        event.setRating(rating ? event.getRating() - 1 : event.getRating() + 1);
-    }
-
     private Event getEvent(long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event not found with id: " + eventId));
     }
 
     private User getUser(long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new NotFoundException("User not found with id" + userId));
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found with id" + userId));
     }
 
     private Category getCategory(long categoryId) {
