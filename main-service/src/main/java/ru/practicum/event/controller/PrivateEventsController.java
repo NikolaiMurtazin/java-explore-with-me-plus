@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.service.EventService;
+import ru.practicum.rating.service.EventRatingService;
 
 import java.util.List;
 
@@ -18,8 +19,9 @@ import java.util.List;
 public class PrivateEventsController {
     private final EventService eventService;
 
+    private final EventRatingService eventRatingService;
+
     @GetMapping
-    @ResponseStatus(HttpStatus.OK)
     public List<EventShortDto> getAll(@PathVariable("userId") long userId,
                                       @RequestParam(value = "from", defaultValue = "0") int from,
                                       @RequestParam(value = "size", defaultValue = "10") int size) {
@@ -35,14 +37,12 @@ public class PrivateEventsController {
     }
 
     @GetMapping("/{eventId}")
-    @ResponseStatus(HttpStatus.OK)
     public EventFullDto getById(@PathVariable("userId") long userId,
                                 @PathVariable("eventId") long eventId) {
         return eventService.getById(userId, eventId);
     }
 
     @PatchMapping("/{eventId}")
-    @ResponseStatus(HttpStatus.OK)
     public EventFullDto update(@PathVariable("userId") long userId,
                                @PathVariable("eventId") long eventId,
                                @Valid @RequestBody UpdateEventUserRequest updateEventUserRequest) {
@@ -50,30 +50,28 @@ public class PrivateEventsController {
     }
 
     @PatchMapping("/{eventId}/like")
-    @ResponseStatus(HttpStatus.OK)
     public void like(@Min(0) @PathVariable("userId") long userId,
                      @Min(0) @PathVariable("eventId") long eventId) {
-        eventService.estimate(userId, eventId, true);
+        eventRatingService.addRating(userId, eventId, true);
     }
 
     @PatchMapping("/{eventId}/dislike")
-    @ResponseStatus(HttpStatus.OK)
     public void dislike(@Min(0) @PathVariable("userId") long userId,
                         @Min(0) @PathVariable("eventId") long eventId) {
-        eventService.estimate(userId, eventId, false);
+        eventRatingService.addRating(userId, eventId, false);
     }
 
     @DeleteMapping("/{eventId}/like")
-    @ResponseStatus(HttpStatus.OK)
-    public void deletelike(@Min(0) @PathVariable("userId") long userId,
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteLike(@Min(0) @PathVariable("userId") long userId,
                            @Min(0) @PathVariable("eventId") long eventId) {
-        eventService.deleteEstimete(userId, eventId, true);
+        eventRatingService.removeRating(userId, eventId, true);
     }
 
     @DeleteMapping("/{eventId}/dislike")
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteDislike(@Min(0) @PathVariable("userId") long userId,
                               @Min(0) @PathVariable("eventId") long eventId) {
-        eventService.deleteEstimete(userId, eventId, false);
+        eventRatingService.removeRating(userId, eventId, false);
     }
 }

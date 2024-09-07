@@ -3,7 +3,6 @@ package ru.practicum.event.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.client.StatClient;
 import ru.practicum.event.dto.EventFullDto;
@@ -26,7 +25,6 @@ public class PublicEventsController {
     private final StatClient statClient;
 
     @GetMapping()
-    @ResponseStatus(HttpStatus.OK)
     public List<EventShortDto> getEventsPublic(@RequestParam(value = "text", required = false) String text,
                                                @RequestParam(value = "categories", required = false) List<Long> categories,
                                                @RequestParam(value = "paid", required = false) Boolean paid,
@@ -59,8 +57,7 @@ public class PublicEventsController {
     }
 
     @GetMapping("/{eventId}")
-    @ResponseStatus(HttpStatus.OK)
-    public EventFullDto getEvent(@PathVariable("eventId") long eventId, HttpServletRequest request) {
+    public EventFullDto getById(@PathVariable("eventId") long eventId, HttpServletRequest request) {
         EventFullDto event = eventService.getById(eventId);
         sendStats(request);
         return event;
@@ -77,8 +74,6 @@ public class PublicEventsController {
     }
 
     private void sendStats(HttpServletRequest request) {
-
-
         statClient.saveStats(request);
     }
 }
