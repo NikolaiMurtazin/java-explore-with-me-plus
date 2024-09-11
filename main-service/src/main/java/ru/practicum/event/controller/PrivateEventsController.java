@@ -1,14 +1,12 @@
 package ru.practicum.event.controller;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.event.dto.*;
 import ru.practicum.event.service.EventService;
-import ru.practicum.rating.service.EventRatingService;
 
 import java.util.List;
 
@@ -18,8 +16,6 @@ import java.util.List;
 @RequestMapping("/users/{userId}/events")
 public class PrivateEventsController {
     private final EventService eventService;
-
-    private final EventRatingService eventRatingService;
 
     @GetMapping
     public List<EventShortDto> getAll(@PathVariable("userId") long userId,
@@ -47,31 +43,5 @@ public class PrivateEventsController {
                                @PathVariable("eventId") long eventId,
                                @Valid @RequestBody UpdateEventUserRequest updateEventUserRequest) {
         return eventService.update(userId, eventId, updateEventUserRequest);
-    }
-
-    @PatchMapping("/{eventId}/like")
-    public void like(@Min(0) @PathVariable("userId") long userId,
-                     @Min(0) @PathVariable("eventId") long eventId) {
-        eventRatingService.addRating(userId, eventId, true);
-    }
-
-    @PatchMapping("/{eventId}/dislike")
-    public void dislike(@Min(0) @PathVariable("userId") long userId,
-                        @Min(0) @PathVariable("eventId") long eventId) {
-        eventRatingService.addRating(userId, eventId, false);
-    }
-
-    @DeleteMapping("/{eventId}/like")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteLike(@Min(0) @PathVariable("userId") long userId,
-                           @Min(0) @PathVariable("eventId") long eventId) {
-        eventRatingService.removeRating(userId, eventId, true);
-    }
-
-    @DeleteMapping("/{eventId}/dislike")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteDislike(@Min(0) @PathVariable("userId") long userId,
-                              @Min(0) @PathVariable("eventId") long eventId) {
-        eventRatingService.removeRating(userId, eventId, false);
     }
 }
