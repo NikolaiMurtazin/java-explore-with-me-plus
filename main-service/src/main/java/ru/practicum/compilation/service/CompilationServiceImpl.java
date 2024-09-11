@@ -19,6 +19,7 @@ import ru.practicum.event.mapper.EventMapper;
 import ru.practicum.event.model.Event;
 import ru.practicum.event.repository.EventRepository;
 import ru.practicum.exeption.NotFoundException;
+import ru.practicum.rating.repository.RatingRepository;
 import ru.practicum.request.dto.EventCountByRequest;
 import ru.practicum.request.repository.RequestRepository;
 import ru.practicum.stat.StatsParams;
@@ -28,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -39,6 +41,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final RequestRepository requestRepository;
     private final StatClient statClient;
     private final EventMapper eventMapper;
+    private final RatingRepository ratingRepository;
 
 
     private final CompilationMapper compilationMapper;
@@ -61,7 +64,6 @@ public class CompilationServiceImpl implements CompilationService {
 
         List<EventCountByRequest> eventsIdWithViews = requestRepository.findConfirmedRequestWithoutLimitCheck(compEvents);
 
-
         List<String> uris = eventsIdWithViews.stream().map(ev -> "/events/" + ev.getEventId()).toList();
 
         StatsParams statsParams = StatsParams.builder().uris(uris).unique(true).start(LocalDateTime.now().minusYears(100)).end(LocalDateTime.now()).build();
@@ -70,10 +72,10 @@ public class CompilationServiceImpl implements CompilationService {
 
         return eventsIdWithViews.stream().map(ev -> {
             Event finalEvent = compEvents.stream().filter(e -> e.getId().equals(ev.getEventId())).findFirst().orElseThrow(() -> new IllegalStateException("Event not found: " + ev.getEventId()));
-
+            int rating = getRating(finalEvent);
             long views = viewStatsDTOS.stream().filter(stat -> stat.getUri().equals("/events/" + ev.getEventId())).map(ViewStatsDTO::getHits).findFirst().orElse(0L);
             finalEvent.setConfirmedRequests(Math.toIntExact(ev.getCount()));
-            return eventMapper.toEventShortDto(finalEvent,views);
+            return eventMapper.toEventShortDto(finalEvent, rating, views);
         }).toList();
     }
 
@@ -132,5 +134,11 @@ public class CompilationServiceImpl implements CompilationService {
         Compilation compilation = compilationRepository.findById(compId).orElseThrow(() -> new NotFoundException("Compilation with id= " + compId + " was not found"));
 
         return compilationMapper.toCompilationDto(compilation, getEventShortDtos(compilation));
+    }
+
+    private int getRating(Event event) {
+        int likes = Optional.of(ratingRepository.countLikesByEvent(event)).orElse(0);
+        int dislikes = Optional.of(ratingRepository.countDislikesByEvent(event)).orElse(0);
+        return likes - dislikes;
     }
 }

@@ -70,7 +70,4 @@ public class Event {
 
     @Column(name = "title", nullable = false)
     private String title;
-
-    @Column(name = "like_count", nullable = false)
-    private Integer likeCount;
 }

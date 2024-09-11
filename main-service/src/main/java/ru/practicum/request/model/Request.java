@@ -23,7 +23,6 @@ public class Request {
     private Long id;
 
     @Column(name = "created")
-
     private LocalDateTime created;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -17,6 +17,8 @@ import lombok.Setter;
 import ru.practicum.event.model.Event;
 import ru.practicum.user.model.User;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "event_ratings")
 @Getter
@@ -24,12 +26,15 @@ import ru.practicum.user.model.User;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class EventRating {
+public class Rating {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "rating_id")
     private Long id;
+
+    @Column(name = "created")
+    private LocalDateTime created;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
