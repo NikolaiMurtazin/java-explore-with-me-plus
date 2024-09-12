@@ -3,7 +3,6 @@ package ru.practicum.event.service;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.category.model.Category;
@@ -33,7 +32,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-import static ru.practicum.event.model.Sort.TOP_RATING;
+import static ru.practicum.event.model.Sort.*;
 
 @Service
 @RequiredArgsConstructor
@@ -72,17 +71,7 @@ public class EventServiceImpl implements EventService {
         }
         BooleanExpression finalConditional = conditions.stream().reduce(BooleanExpression::and).get();
 
-        PageRequest pageRequest;
-        if (params.getSort() != null) {
-            pageRequest = switch (params.getSort()) {
-                case EVENT_DATE ->
-                        PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(Sort.Direction.ASC, "eventDate"));
-                case VIEWS -> PageRequest.of(from > 0 ? from / size : 0, size, Sort.by(Sort.Direction.DESC, "views"));
-                default -> PageRequest.of(from > 0 ? from / size : 0, size);
-            };
-        } else {
-            pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
-        }
+        PageRequest pageRequest = PageRequest.of(from > 0 ? from / size : 0, size);
 
         List<Event> events = eventRepository.findAll(finalConditional, pageRequest).getContent();
         if (events.isEmpty()) {
@@ -107,8 +96,14 @@ public class EventServiceImpl implements EventService {
                 })
                 .toList());
 
-        if (params.getSort() != null && params.getSort() == TOP_RATING) {
-            eventShortDtos.sort(Comparator.comparing(EventShortDto::getRating).reversed());
+        if (params.getSort() != null) {
+            if (params.getSort() == EVENT_DATE) {
+                eventShortDtos.sort(Comparator.comparing(EventShortDto::getEventDate).reversed());
+            } else if (params.getSort() == VIEWS) {
+                eventShortDtos.sort(Comparator.comparing(EventShortDto::getViews).reversed());
+            } else if (params.getSort() == TOP_RATING) {
+                eventShortDtos.sort(Comparator.comparing(EventShortDto::getRating).reversed());
+            }
         }
 
         return eventShortDtos;
