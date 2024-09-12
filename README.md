@@ -1,6 +1,3 @@
-## Pull request
-https://github.com/NikolaiMurtazin/java-explore-with-me-plus/pull/14
-
 # java-explore-with-me
 
 ## Для чего предназначен этот проект
