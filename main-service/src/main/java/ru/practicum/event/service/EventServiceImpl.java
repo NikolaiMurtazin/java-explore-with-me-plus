@@ -85,7 +85,7 @@ public class EventServiceImpl implements EventService {
         }
 
         List<ViewStatsDTO> viewStatsDTOS = getViewStatsDTOS(eventsIdWithConfirmedRequest);
-        List<EventRatingDto> eventRatingDtos = getEventViewsDtos(events);
+        List<EventRatingDto> eventRatingDtos = getEventRatingDtos(events);
 
         List<EventShortDto> eventShortDtos = new ArrayList<>(eventsIdWithConfirmedRequest.stream()
                 .map(ev -> {
@@ -109,7 +109,7 @@ public class EventServiceImpl implements EventService {
         return eventShortDtos;
     }
 
-    private List<EventRatingDto> getEventViewsDtos(List<Event> events) {
+    private List<EventRatingDto> getEventRatingDtos(List<Event> events) {
         return ratingRepository.countEventsRating(events);
     }
 
@@ -159,7 +159,7 @@ public class EventServiceImpl implements EventService {
 
         List<EventCountByRequest> eventsIdWithConfirmedRequest
                 = requestRepository.findConfirmedRequestWithoutLimitCheck(events);
-        List<EventRatingDto> eventRatingDtos = getEventViewsDtos(events);
+        List<EventRatingDto> eventRatingDtos = getEventRatingDtos(events);
 
 
         List<ViewStatsDTO> viewStatsDTOS = getViewStatsDTOS(eventsIdWithConfirmedRequest);
@@ -192,7 +192,7 @@ public class EventServiceImpl implements EventService {
                 = requestRepository.findConfirmedRequestWithoutLimitCheck(events);
 
         List<ViewStatsDTO> viewStatsDTOS = getViewStatsDTOS(eventsIdWithConfirmedRequest);
-        List<EventRatingDto> eventRatingDtos = getEventViewsDtos(events);
+        List<EventRatingDto> eventRatingDtos = getEventRatingDtos(events);
 
         return eventsIdWithConfirmedRequest.stream()
                 .map(ev -> {
